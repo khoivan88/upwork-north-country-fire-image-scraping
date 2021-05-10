@@ -126,10 +126,13 @@ class NCFImageSpider(scrapy.Spider):
 
         desired_image_url = exact_match['t2'].replace('_small.png', '_1000x1000.png')
 
+        # Some sku contain forward slash, not good for filename, e.g 'VDY24/18NMP', 'RAK35/40'
+        desired_image_name = item['mainImageName(.png)'].replace('/', '_')
+
         item = {
             # 'image_name': json_res['term'],
             # 'image_name': exact_match['sku'].lower(),
-            'image_name': item['mainImageName(.png)'],
+            'image_name': desired_image_name,
             'image_brand': exact_match['v'],
             'file_urls': [desired_image_url],
             # 'files': [json_res["term"]],
