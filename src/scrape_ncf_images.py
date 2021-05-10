@@ -45,12 +45,13 @@ DOWNLOAD_FOLDER.mkdir(exist_ok=True)
 from scrapy.pipelines.files import FilesPipeline
 
 
-# TODO: fix identical matches but one has no picture, suggestion check for result of 't2' (image url)
 # TODO: fix for item with SKU is '???'
 
 # TODO: TEST: find correct url for 'GL10B', 'GL10FR'
 # TODO: TEST: find correct url for 'vdy24/18nmp', 'RAK35/40', 'TM/R2-A', 'CEG-SMOKES/5', 'GC-40/15', 'IFV2-100/15', TH-WTC/LP'
 # TODO: TEST: for those found match but without any images, such as '10K81+Thurmalox'
+# TODO: TEST: for those with input in different cases (lower vs upper), such as '58dva-wtec', rf571', 'w175-0726'
+# TODO: TEST: for those "HDLOGS-ODCOUG, GR-ODCOUG", "SDLOGS-ODCOUG, GR-ODCOUG"
 
 class MyFilesPipeline(FilesPipeline):
 
@@ -104,8 +105,8 @@ class NCFImageSpider(scrapy.Spider):
         json_res = json.loads(response.body)
         exact_match = next((match
                             for match in json_res['items']
-                            if (item['manufacturerSKU'] == match['sku']
-                                and item['brand'] == match['v']             # match return in API has 'v' containing 'brand'
+                            if (item['manufacturerSKU'].lower() == match['sku'].lower()
+                                and item['brand'].lower() == match['v'].lower()             # match return in API has 'v' containing 'brand'
                                 and match['t2']                             # match return in API has 't2' containing image url
                                 )
                             ),
@@ -115,8 +116,8 @@ class NCFImageSpider(scrapy.Spider):
         if not exact_match:
             exact_match_without_image = next((match
                                 for match in json_res['items']
-                                if (item['manufacturerSKU'] == match['sku']
-                                    and item['brand'] == match['v'])),
+                                if (item['manufacturerSKU'].lower() == match['sku'].lower()
+                                    and item['brand'].lower() == match['v'].lower())),
                             None)
 
 
