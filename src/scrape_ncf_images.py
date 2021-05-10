@@ -49,6 +49,9 @@ from scrapy.pipelines.files import FilesPipeline
 # TODO: fix for filename containing forward slash such as 'vdy24/18nmp'
 # TODO: fix for item with SKU is '???'
 
+# TODO: TEST: find correct url for 'GL10B', 'GL10FR'
+# TODO: TEST: find correct url for 'vdy24/18nmp', 'RAK35/40', 'TM/R2-A', 'CEG-SMOKES/5', 'GC-40/15', 'IFV2-100/15', TH-WTC/LP'
+
 class MyFilesPipeline(FilesPipeline):
 
     def file_path(self, request, response=None, info=None, *, item=None):
