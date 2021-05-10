@@ -58,7 +58,13 @@ class MyFilesPipeline(FilesPipeline):
 
     def file_path(self, request, response=None, info=None, *, item=None):
         # Save to 'brand' folder with the sku (lower case) as filename
-        return f"{item['image_brand']}/{item['image_name']}.png"
+
+        if item['image_name'] == 'cdfi500-pro':
+            breakpoint()
+
+        # return f"{item['image_brand']}/{item['image_name']}.png"
+        extension = Path(urlparse(request.url).path).suffix
+        return f"{item['image_brand']}/{item['image_name']}{extension}"
 
 
 def import_item_list(file):
@@ -140,7 +146,7 @@ class NCFImageSpider(scrapy.Spider):
         # if json_res['total_results'] != 1 or not exact_match:
         # If the API returns no match at all,
         # if json_res['total_results'] == 0:
-            console.log(f'Item with manufacturerSKU "{item["manufacturerSKU"]}" found but has NO images')
+            # console.log(f'Item with manufacturerSKU "{item["manufacturerSKU"]}" found but has NO images')
             item['comment'] = 'manufacturerSKU found but has NO images'
             write_not_found_item_to_csv(file=IMAGE_NOT_FOUND_RESULT_FILE,
                                         line=item)
@@ -148,7 +154,7 @@ class NCFImageSpider(scrapy.Spider):
 
         # If the API returns no match at all,
         if (json_res['total_results'] == 0 or not exact_match):
-            console.log(f'Item with manufacturerSKU "{item["manufacturerSKU"]}" not found')
+            # console.log(f'Item with manufacturerSKU "{item["manufacturerSKU"]}" not found')
             item['comment'] = 'manufacturerSKU not found'
             write_not_found_item_to_csv(file=IMAGE_NOT_FOUND_RESULT_FILE,
                                         line=item)
@@ -161,7 +167,7 @@ class NCFImageSpider(scrapy.Spider):
         # if json_res['total_results'] > 0
 
 
-        desired_image_url = exact_match['t2'].replace('_small.png', '_1000x1000.png')
+        desired_image_url = exact_match['t2'].replace('_small.', '_1000x1000.')
 
         # Some sku contain forward slash, not good for filename, e.g 'VDY24/18NMP', 'RAK35/40'
         desired_image_name = item['mainImageName(.png)'].replace('/', '_')
@@ -260,7 +266,9 @@ if __name__ == '__main__':
         # 'ITEM_PIPELINES': {
             # '__main__.RemoveIgnoredKeywordsPipeline': 100,
             # },
+        'MEDIA_ALLOW_REDIRECTS': True,
         'FILES_STORE': str(DOWNLOAD_FOLDER),
+        # 'MYPIPELINE_FILES_EXPIRES': 0,
         'ITEM_PIPELINES': {
             # 'scrapy.pipelines.images.FilesPipeline': 1,
             '__main__.MyFilesPipeline': 1,
@@ -279,7 +287,7 @@ if __name__ == '__main__':
         #         },
         #     },
         # },
-        'LOG_LEVEL': 'WARNING',
+        'LOG_LEVEL': 'INFO',
         # 'ROBOTSTXT_OBEY': False,
     }
 
