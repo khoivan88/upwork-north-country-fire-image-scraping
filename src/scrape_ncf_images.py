@@ -46,11 +46,11 @@ from scrapy.pipelines.files import FilesPipeline
 
 
 # TODO: fix identical matches but one has no picture, suggestion check for result of 't2' (image url)
-# TODO: fix for filename containing forward slash such as 'vdy24/18nmp'
 # TODO: fix for item with SKU is '???'
 
 # TODO: TEST: find correct url for 'GL10B', 'GL10FR'
 # TODO: TEST: find correct url for 'vdy24/18nmp', 'RAK35/40', 'TM/R2-A', 'CEG-SMOKES/5', 'GC-40/15', 'IFV2-100/15', TH-WTC/LP'
+# TODO: TEST: for those found match but without any images, such as '10K81+Thurmalox'
 
 class MyFilesPipeline(FilesPipeline):
 
@@ -105,27 +105,45 @@ class NCFImageSpider(scrapy.Spider):
         exact_match = next((match
                             for match in json_res['items']
                             if (item['manufacturerSKU'] == match['sku']
-                                and item['brand'] == match['v'])),
+                                and item['brand'] == match['v']             # match return in API has 'v' containing 'brand'
+                                and match['t2']                             # match return in API has 't2' containing image url
+                                )
+                            ),
                            None)
 
+        exact_match_without_image = {}
+        if not exact_match:
+            exact_match_without_image = next((match
+                                for match in json_res['items']
+                                if (item['manufacturerSKU'] == match['sku']
+                                    and item['brand'] == match['v'])),
+                            None)
 
-        if json_res['total_results'] < 1 or not exact_match:
+
+        if exact_match_without_image:
         # if json_res['total_results'] != 1 or not exact_match:
         # If the API returns no match at all,
         # if json_res['total_results'] == 0:
-            console.log(f'Item with manufacturerSKU "{item["manufacturerSKU"]}" not found')
+            console.log(f'Item with manufacturerSKU "{item["manufacturerSKU"]}" found but has NO images')
+            item['comment'] = 'manufacturerSKU found but has NO images'
             write_not_found_item_to_csv(file=IMAGE_NOT_FOUND_RESULT_FILE,
                                         line=item)
             return None
+
+        # If the API returns no match at all,
+        if (json_res['total_results'] == 0 or not exact_match):
+            console.log(f'Item with manufacturerSKU "{item["manufacturerSKU"]}" not found')
+            item['comment'] = 'manufacturerSKU not found'
+            write_not_found_item_to_csv(file=IMAGE_NOT_FOUND_RESULT_FILE,
+                                        line=item)
+            return None
+
 
         # If the API returning multiple result, do NOT rely on the API,
         # because it only return a fraction of all matches and
         # the result can be wrong. e.g item with manufacturerSKU "GL10FR"
         # if json_res['total_results'] > 0
 
-        item_url = f'https://www.northcountryfire.com{exact_match["u"]}'
-
-        cb_kwargs = { 'desired_image_name': json_res['term'] }
 
         desired_image_url = exact_match['t2'].replace('_small.png', '_1000x1000.png')
 
