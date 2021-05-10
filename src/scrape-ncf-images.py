@@ -19,12 +19,12 @@ from rich.logging import RichHandler
 from rich.progress import Progress, BarColumn, SpinnerColumn, TimeElapsedColumn
 
 
-# console = Console()
-# # sys.setrecursionlimit(20000)
+console = Console()
+# sys.setrecursionlimit(20000)
 
 # # Set logger using Rich: https://rich.readthedocs.io/en/latest/logging.html
 # logging.basicConfig(
-#     level="WARNING",
+#     level="INFO",
 #     format="%(message)s",
 #     datefmt="[%X]",
 #     handlers=[RichHandler(rich_tracebacks=True)]
@@ -36,7 +36,7 @@ CURRENT_FILEPATH = Path(__file__).resolve().parent
 DATA_FOLDER = CURRENT_FILEPATH / 'data'
 DATA_FOLDER.mkdir(exist_ok=True)
 INPUT_FILE = DATA_FOLDER / 'imageNames-test.csv'
-THIS_SPIDER_RESULT_FILE = DATA_FOLDER / 'result.json'
+IMAGE_NOT_FOUND_RESULT_FILE = DATA_FOLDER / 'images_not_found.csv'
 DOWNLOAD_FOLDER = CURRENT_FILEPATH.parent / 'downloads'
 DOWNLOAD_FOLDER.mkdir(exist_ok=True)
 
@@ -55,17 +55,38 @@ def import_item_list(file):
         return list(csv.DictReader(fin))
 
 
+def write_not_found_item_to_csv(file, line):
+    '''Write item without found images into csv file'''
+    file_exists = Path(file).exists()
+    with open(Path(file), 'a') as csvfile:
+        headers = list(line.keys())
+        writer = csv.DictWriter(csvfile, delimiter=',', lineterminator='\n',fieldnames=headers)
+
+        if not file_exists:
+            writer.writeheader()  # file doesn't exist yet, write a header
+
+        writer.writerow(line)
+
+
 class NCFImageSpider(scrapy.Spider):
     item_list = import_item_list(INPUT_FILE)
     name = 'ncf-images-spider'
     allowed_domains = ['ultimate-dot-acp-magento.appspot.com']
-    item_sku_list = (item["manufacturerSKU"] for item in item_list)
-    start_urls = [f'https://ultimate-dot-acp-magento.appspot.com/?q={sku}&store_id=14034773&UUID=34efc3a6-91d4-4403-99fa-5633d6e9a5bd'
-                  for sku in item_sku_list]
-    base_url = 'https://ultimate-dot-acp-magento.appspot.com/'
+    # item_sku_list = (item["manufacturerSKU"] for item in item_list)
+    # start_urls = [f'https://ultimate-dot-acp-magento.appspot.com/?q={sku}&store_id=14034773&UUID=34efc3a6-91d4-4403-99fa-5633d6e9a5bd'
+    #               for sku in item_sku_list]
+    # base_url = 'https://ultimate-dot-acp-magento.appspot.com/'
     # handle_httpstatus_list = [301, 302]
 
-    def parse(self, response):
+    # Use `start_requests()` to be able to pass the whole csv line as keyword arguments into `parse`
+    # this way, csv line info for not found image can be written into result file
+    def start_requests(self):
+        for item in self.item_list:
+            sku = item['manufacturerSKU']
+            url = f'https://ultimate-dot-acp-magento.appspot.com/?q={sku}&store_id=14034773&UUID=34efc3a6-91d4-4403-99fa-5633d6e9a5bd'
+            yield scrapy.Request(url, callback=self.parse, cb_kwargs=item)
+
+    def parse(self, response, **item):
         json_res = json.loads(response.body)
         exact_match = next((item
                             for item in json_res['items']
@@ -73,8 +94,10 @@ class NCFImageSpider(scrapy.Spider):
                            None)
         # if json_res['total_results'] < 1 or not exact_match:
         if json_res['total_results'] != 1 or not exact_match:
-            print(f'Item with manufacturerSKU {json_res["term"]} not found')
-            breakpoint()
+            # self.logger.info(f'Item with manufacturerSKU {json_res["term"]} not found')
+            console.log(f'Item with manufacturerSKU "{item["manufacturerSKU"]}" not found')
+            write_not_found_item_to_csv(file=IMAGE_NOT_FOUND_RESULT_FILE,
+                                        line=item)
             return None
 
         item_url = f'https://www.northcountryfire.com{exact_match["u"]}'
@@ -161,6 +184,8 @@ class NCFImageSpider(scrapy.Spider):
 
 
 if __name__ == '__main__':
+    # Remove the result file if exists
+    IMAGE_NOT_FOUND_RESULT_FILE.unlink(missing_ok=True)
 
     settings = {
         'USER_AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36',
