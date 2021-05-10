@@ -51,8 +51,9 @@ class MyFilesPipeline(FilesPipeline):
 
 
 def import_item_list(file):
-    with open(file, 'r', newline='') as fin:
-        return list(csv.DictReader(fin))
+    with open(file, 'r', newline='') as csv_file:
+        dict_reader = csv.DictReader(csv_file)
+        yield from dict_reader
 
 
 def write_not_found_item_to_csv(file, line):
@@ -72,9 +73,11 @@ class NCFImageSpider(scrapy.Spider):
     item_list = import_item_list(INPUT_FILE)
     name = 'ncf-images-spider'
     allowed_domains = ['ultimate-dot-acp-magento.appspot.com']
+
     # item_sku_list = (item["manufacturerSKU"] for item in item_list)
     # start_urls = [f'https://ultimate-dot-acp-magento.appspot.com/?q={sku}&store_id=14034773&UUID=34efc3a6-91d4-4403-99fa-5633d6e9a5bd'
     #               for sku in item_sku_list]
+
     # base_url = 'https://ultimate-dot-acp-magento.appspot.com/'
     # handle_httpstatus_list = [301, 302]
 
@@ -94,7 +97,6 @@ class NCFImageSpider(scrapy.Spider):
                            None)
         # if json_res['total_results'] < 1 or not exact_match:
         if json_res['total_results'] != 1 or not exact_match:
-            # self.logger.info(f'Item with manufacturerSKU {json_res["term"]} not found')
             console.log(f'Item with manufacturerSKU "{item["manufacturerSKU"]}" not found')
             write_not_found_item_to_csv(file=IMAGE_NOT_FOUND_RESULT_FILE,
                                         line=item)
