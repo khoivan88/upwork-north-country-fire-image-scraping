@@ -35,13 +35,19 @@ console = Console()
 CURRENT_FILEPATH = Path(__file__).resolve().parent
 DATA_FOLDER = CURRENT_FILEPATH / 'data'
 DATA_FOLDER.mkdir(exist_ok=True)
-INPUT_FILE = DATA_FOLDER / 'imageNames-test.csv'
+# INPUT_FILE = DATA_FOLDER / 'imageNames-test.csv'
+INPUT_FILE = DATA_FOLDER / 'imageNames.csv'
 IMAGE_NOT_FOUND_RESULT_FILE = DATA_FOLDER / 'images_not_found.csv'
 DOWNLOAD_FOLDER = CURRENT_FILEPATH.parent / 'downloads'
 DOWNLOAD_FOLDER.mkdir(exist_ok=True)
 
 
 from scrapy.pipelines.files import FilesPipeline
+
+
+# TODO: fix identical matches but one has no picture, suggestion check for result of 't2' (image url)
+# TODO: fix for filename containing forward slash such as 'vdy24/18nmp'
+# TODO: fix for item with SKU is '???'
 
 class MyFilesPipeline(FilesPipeline):
 
@@ -86,21 +92,33 @@ class NCFImageSpider(scrapy.Spider):
     def start_requests(self):
         for item in self.item_list:
             sku = item['manufacturerSKU']
-            url = f'https://ultimate-dot-acp-magento.appspot.com/?q={sku}&store_id=14034773&UUID=34efc3a6-91d4-4403-99fa-5633d6e9a5bd'
+            brand = item['brand']
+            url = f'https://ultimate-dot-acp-magento.appspot.com/?q={sku}+{brand}&store_id=14034773&UUID=34efc3a6-91d4-4403-99fa-5633d6e9a5bd'
             yield scrapy.Request(url, callback=self.parse, cb_kwargs=item)
 
     def parse(self, response, **item):
+        # breakpoint()
         json_res = json.loads(response.body)
-        exact_match = next((item
-                            for item in json_res['items']
-                            if json_res['term'] == item['sku'].lower()),
+        exact_match = next((match
+                            for match in json_res['items']
+                            if (item['manufacturerSKU'] == match['sku']
+                                and item['brand'] == match['v'])),
                            None)
-        # if json_res['total_results'] < 1 or not exact_match:
-        if json_res['total_results'] != 1 or not exact_match:
+
+
+        if json_res['total_results'] < 1 or not exact_match:
+        # if json_res['total_results'] != 1 or not exact_match:
+        # If the API returns no match at all,
+        # if json_res['total_results'] == 0:
             console.log(f'Item with manufacturerSKU "{item["manufacturerSKU"]}" not found')
             write_not_found_item_to_csv(file=IMAGE_NOT_FOUND_RESULT_FILE,
                                         line=item)
             return None
+
+        # If the API returning multiple result, do NOT rely on the API,
+        # because it only return a fraction of all matches and
+        # the result can be wrong. e.g item with manufacturerSKU "GL10FR"
+        # if json_res['total_results'] > 0
 
         item_url = f'https://www.northcountryfire.com{exact_match["u"]}'
 
@@ -109,7 +127,9 @@ class NCFImageSpider(scrapy.Spider):
         desired_image_url = exact_match['t2'].replace('_small.png', '_1000x1000.png')
 
         item = {
-            'image_name': json_res['term'],
+            # 'image_name': json_res['term'],
+            # 'image_name': exact_match['sku'].lower(),
+            'image_name': item['mainImageName(.png)'],
             'image_brand': exact_match['v'],
             'file_urls': [desired_image_url],
             # 'files': [json_res["term"]],
