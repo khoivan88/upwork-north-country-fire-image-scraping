@@ -52,6 +52,7 @@ from scrapy.pipelines.files import FilesPipeline
 # TODO: TEST: for those found match but without any images, such as '10K81+Thurmalox'
 # TODO: TEST: for those with input in different cases (lower vs upper), such as '58dva-wtec', rf571', 'w175-0726'
 # TODO: TEST: for those "HDLOGS-ODCOUG, GR-ODCOUG", "SDLOGS-ODCOUG, GR-ODCOUG"
+# TODO: TEST: for those "BZLB-BLNI RAP54", "BZLB-BLNI RAP42", 'MHS HEAT-ZONE-TOP'
 
 class MyFilesPipeline(FilesPipeline):
 
@@ -95,9 +96,23 @@ class NCFImageSpider(scrapy.Spider):
     # this way, csv line info for not found image can be written into result file
     def start_requests(self):
         for item in self.item_list:
-            sku = item['manufacturerSKU']
+            sku_string = item['manufacturerSKU']
             brand = item['brand']
-            url = f'https://ultimate-dot-acp-magento.appspot.com/?q={sku}+{brand}&store_id=14034773&UUID=34efc3a6-91d4-4403-99fa-5633d6e9a5bd'
+
+            # Sometimes, the 'manufacturerSKU' contains items with commas:
+            # e.g.  "HDLOGS-ODCOUG, GR-ODCOUG", "SDLOGS-ODCOUG, GR-ODCOUG", "DLE, RAK35/40"
+            # In these cases, split the on commas and search for each SKU
+            skus = [sku.strip() for sku in sku_string.split(',')]
+            if len(skus) > 1:
+                console.log(f'This line contains 2 manufacturerSKU "{sku_string}".\nSearching for each now...')
+
+                urls = [f'https://ultimate-dot-acp-magento.appspot.com/?q={sku}+{brand}&store_id=14034773&UUID=34efc3a6-91d4-4403-99fa-5633d6e9a5bd'
+                        for sku in skus]
+                for url, sku in zip(urls, skus):
+                    item.update({ 'manufacturerSKU': sku, 'mainImageName(.png)': sku.lower() })
+                    yield scrapy.Request(url, callback=self.parse, cb_kwargs=item)
+
+            url = f'https://ultimate-dot-acp-magento.appspot.com/?q={sku_string}+{brand}&store_id=14034773&UUID=34efc3a6-91d4-4403-99fa-5633d6e9a5bd'
             yield scrapy.Request(url, callback=self.parse, cb_kwargs=item)
 
     def parse(self, response, **item):
@@ -105,7 +120,7 @@ class NCFImageSpider(scrapy.Spider):
         json_res = json.loads(response.body)
         exact_match = next((match
                             for match in json_res['items']
-                            if (item['manufacturerSKU'].lower() == match['sku'].lower()
+                            if (item['manufacturerSKU'].lower() == match['sku'].lower().rstrip(',')     # Sometimes, item returned by the API has SKU ends with comma (such as 'DLE,')
                                 and item['brand'].lower() == match['v'].lower()             # match return in API has 'v' containing 'brand'
                                 and match['t2']                             # match return in API has 't2' containing image url
                                 )
@@ -116,7 +131,7 @@ class NCFImageSpider(scrapy.Spider):
         if not exact_match:
             exact_match_without_image = next((match
                                 for match in json_res['items']
-                                if (item['manufacturerSKU'].lower() == match['sku'].lower()
+                                if (item['manufacturerSKU'].lower() == match['sku'].lower().rstrip(',')     # Sometimes, item returned by the API has SKU ends with comma (such as 'DLE,')
                                     and item['brand'].lower() == match['v'].lower())),
                             None)
 
