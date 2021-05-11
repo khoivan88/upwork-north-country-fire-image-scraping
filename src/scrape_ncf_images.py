@@ -127,10 +127,10 @@ class NCFImageSpider(scrapy.Spider):
 
         # Check for special manufacturerSKU containing spaces
         # e.g: "BZLB-BLNI RAP54", "BZLB-BLNI RAP42", 'MHS HEAT-ZONE-TOP'
-
+        number_of_word = len(item['manufacturerSKU'].split(' '))
         exact_match = next((match
                             for match in json_res['items']
-                            if (item['manufacturerSKU'].lower() == match['sku'].lower().rstrip(',')     # Sometimes, item returned by the API has SKU ends with comma (such as 'DLE,')
+                            if (item['manufacturerSKU'].lower() == ' '.join(match['skus'][:number_of_word]).lower().rstrip(',')     # Sometimes, item returned by the API has SKU ends with comma (such as 'DLE,')
                                 and item['brand'].lower() == match['v'].lower()             # match return in API has 'v' containing 'brand'
                                 and match['t2']                             # match return in API has 't2' containing image url
                                 )
@@ -139,11 +139,14 @@ class NCFImageSpider(scrapy.Spider):
 
         exact_match_without_image = {}
         if not exact_match:
-            exact_match_without_image = next((match
-                                for match in json_res['items']
-                                if (item['manufacturerSKU'].lower() == match['sku'].lower().rstrip(',')     # Sometimes, item returned by the API has SKU ends with comma (such as 'DLE,')
-                                    and item['brand'].lower() == match['v'].lower())),
-                            None)
+            number_of_word = len(item['manufacturerSKU'].split(' '))
+            exact_match_without_image = (
+                next((match
+                      for match in json_res['items']
+                      if (item['manufacturerSKU'].lower() == ' '.join(match['skus'][:number_of_word]).lower().rstrip(',')     # Sometimes, item returned by the API has SKU ends with comma (such as 'DLE,')
+                          and item['brand'].lower() == match['v'].lower())),
+                     None)
+            )
 
         # Have to check this condition before the other
         if exact_match_without_image:
@@ -163,7 +166,8 @@ class NCFImageSpider(scrapy.Spider):
         desired_image_url = exact_match['t2'].replace('_small.', '_1000x1000.')
 
         # Some sku contain forward slash, not good for filename, e.g 'VDY24/18NMP', 'RAK35/40'
-        desired_image_name = item['mainImageName(.png)'].replace('/', '_')
+        # or space, e.g. "BZLB-BLNI RAP54", "BZLB-BLNI RAP42", 'MHS HEAT-ZONE-TOP'
+        desired_image_name = item['mainImageName(.png)'].replace('/', '_').replace(' ', '-')
 
         item = {
             # 'image_name': json_res['term'],
