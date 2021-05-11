@@ -1,5 +1,5 @@
+import sys
 import re
-from datetime import datetime, timedelta
 from pathlib import Path, PurePath
 from urllib.parse import urlparse, parse_qs
 import logging
@@ -7,17 +7,21 @@ import logging
 import scrapy
 import csv
 import json
+from functools import partial
+from multiprocessing import Pool
 
 from scrapy.crawler import CrawlerProcess
 from scrapy.exceptions import DropItem
 from scrapy.exporters import CsvItemExporter
-
+from itemadapter import ItemAdapter
+from scrapy.exceptions import DropItem
 from items import ImageItem
 
 from rich.console import Console
 from rich.logging import RichHandler
 from rich.progress import Progress, BarColumn, SpinnerColumn, TimeElapsedColumn
 
+from PIL import Image
 
 console = Console()
 # sys.setrecursionlimit(20000)
@@ -59,10 +63,6 @@ class MyFilesPipeline(FilesPipeline):
     def file_path(self, request, response=None, info=None, *, item=None):
         # Save to 'brand' folder with the sku (lower case) as filename
 
-        if item['image_name'] == 'cdfi500-pro':
-            breakpoint()
-
-        # return f"{item['image_brand']}/{item['image_name']}.png"
         extension = Path(urlparse(request.url).path).suffix
         return f"{item['image_brand']}/{item['image_name']}{extension}"
 
@@ -115,7 +115,7 @@ class NCFImageSpider(scrapy.Spider):
                 urls = [f'https://ultimate-dot-acp-magento.appspot.com/?q={sku}+{brand}&store_id=14034773&UUID=34efc3a6-91d4-4403-99fa-5633d6e9a5bd'
                         for sku in skus]
                 for url, sku in zip(urls, skus):
-                    item.update({ 'manufacturerSKU': sku, 'mainImageName(.png)': sku.lower() })
+                    item.update({'manufacturerSKU': sku, 'mainImageName(.png)': sku.lower()})
                     yield scrapy.Request(url, callback=self.parse, cb_kwargs=item)
 
             url = f'https://ultimate-dot-acp-magento.appspot.com/?q={sku_string}+{brand}&store_id=14034773&UUID=34efc3a6-91d4-4403-99fa-5633d6e9a5bd'
@@ -124,6 +124,10 @@ class NCFImageSpider(scrapy.Spider):
     def parse(self, response, **item):
         # breakpoint()
         json_res = json.loads(response.body)
+
+        # Check for special manufacturerSKU containing spaces
+        # e.g: "BZLB-BLNI RAP54", "BZLB-BLNI RAP42", 'MHS HEAT-ZONE-TOP'
+
         exact_match = next((match
                             for match in json_res['items']
                             if (item['manufacturerSKU'].lower() == match['sku'].lower().rstrip(',')     # Sometimes, item returned by the API has SKU ends with comma (such as 'DLE,')
@@ -141,12 +145,8 @@ class NCFImageSpider(scrapy.Spider):
                                     and item['brand'].lower() == match['v'].lower())),
                             None)
 
-
+        # Have to check this condition before the other
         if exact_match_without_image:
-        # if json_res['total_results'] != 1 or not exact_match:
-        # If the API returns no match at all,
-        # if json_res['total_results'] == 0:
-            # console.log(f'Item with manufacturerSKU "{item["manufacturerSKU"]}" found but has NO images')
             item['comment'] = 'manufacturerSKU found but has NO images'
             write_not_found_item_to_csv(file=IMAGE_NOT_FOUND_RESULT_FILE,
                                         line=item)
@@ -159,13 +159,6 @@ class NCFImageSpider(scrapy.Spider):
             write_not_found_item_to_csv(file=IMAGE_NOT_FOUND_RESULT_FILE,
                                         line=item)
             return None
-
-
-        # If the API returning multiple result, do NOT rely on the API,
-        # because it only return a fraction of all matches and
-        # the result can be wrong. e.g item with manufacturerSKU "GL10FR"
-        # if json_res['total_results'] > 0
-
 
         desired_image_url = exact_match['t2'].replace('_small.', '_1000x1000.')
 
@@ -251,6 +244,69 @@ class NCFImageSpider(scrapy.Spider):
     #         yield scrapy.Request(url=next_page_url, callback=self.parse)
 
 
+def transform_images():
+    image_files = {f.resolve() for f in Path(DOWNLOAD_FOLDER).glob('**/*.*')}
+    # image_files = {f.resolve()
+    #             #    for f in Path(DOWNLOAD_FOLDER).glob('**/cdfi500-pro.png')    # !Only for testing purpose
+    #                for f in Path(DOWNLOAD_FOLDER).glob('**/*')
+    #                if (f.suffix in ['.png', '.jpg', '.jpeg'])}
+    # log.info(f'{image_files=}')
+    # Ref: https://github.com/willmcgugan/rich/issues/121
+    progress = Progress(SpinnerColumn(),
+                        "[bold green]{task.description}",
+                        BarColumn(),
+                        "[progress.percentage]{task.percentage:>3.1f}%",
+                        "•",
+                        TimeElapsedColumn(),
+                        # transient=True,
+                        console=console)
+    with progress:
+        task_id = progress.add_task("Transforming images...", total=len(image_files), start=True)
+
+        try:
+            pool_size = 25
+            with Pool(processes=pool_size) as p:
+                results = p.imap(partial(convert_and_resize,
+                                        #  indir=Path(indir).resolve(),
+                                         ),
+                                 image_files,
+                                 chunksize=8)
+                for result in results:
+                    progress.advance(task_id)
+
+        except Exception as error:
+            # if debug:
+            # traceback_str = ''.join(traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__))
+            # log.error(traceback_str)
+            # log.exception(error)
+            console.log(error)
+
+
+def convert_and_resize(file: PurePath) -> None:
+    file = Path(file)
+    try:
+        save_new_image = False
+        with Image.open(file) as im:
+            if im.size != (1000, 1000):
+                im = im.resize((1000, 1000))
+                # im = im.thumbnail((1000, 1000))     # use `Image.thumbnail` instead of `resize` to keep the same aspect ration
+                save_new_image = True
+            if save_new_image or im.format != 'png':
+                im.save(file.with_suffix('.png'),
+                        optimize=True    # To give the smallest size possible
+                        )
+        # logging.info(f'{file.suffix=}')
+
+        # Remove non-png files
+        if save_new_image and file.suffix != '.png':
+            file.unlink(missing_ok=True)
+    except OSError:
+        logging.exception("cannot convert", file)
+    except Exception as error:
+        print(file)
+        logging.exception(error)
+
+
 if __name__ == '__main__':
     # Remove the result file if exists
     IMAGE_NOT_FOUND_RESULT_FILE.unlink(missing_ok=True)
@@ -293,4 +349,8 @@ if __name__ == '__main__':
 
     process = CrawlerProcess(settings=settings)
     process.crawl(NCFImageSpider)
-    process.start()
+    with console.status("[bold green]Scraping images...") as status:
+        process.start()
+
+    # Disable for now!!
+    # transform_images()
