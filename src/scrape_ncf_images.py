@@ -89,7 +89,7 @@ def write_not_found_item_to_csv(file, line):
 class NCFImageSpider(scrapy.Spider):
     item_list = import_item_list(INPUT_FILE)
     name = 'ncf-images-spider'
-    allowed_domains = ['ultimate-dot-acp-magento.appspot.com']
+    allowed_domains = ['ultimate-dot-acp-magento.appspot.com', 'www.northcountryfire.com']
 
     # item_sku_list = (item["manufacturerSKU"] for item in item_list)
     # start_urls = [f'https://ultimate-dot-acp-magento.appspot.com/?q={sku}&store_id=14034773&UUID=34efc3a6-91d4-4403-99fa-5633d6e9a5bd'
@@ -109,20 +109,35 @@ class NCFImageSpider(scrapy.Spider):
             # e.g.  "HDLOGS-ODCOUG, GR-ODCOUG", "SDLOGS-ODCOUG, GR-ODCOUG", "DLE, RAK35/40"
             # In these cases, split the on commas and search for each SKU
             skus = [sku.strip() for sku in sku_string.split(',')]
-            if len(skus) > 1:
-                console.log(f'This line contains 2 manufacturerSKU "{sku_string}".\nSearching for each now...')
-
-                urls = [f'https://ultimate-dot-acp-magento.appspot.com/?q={sku}+{brand}&store_id=14034773&UUID=34efc3a6-91d4-4403-99fa-5633d6e9a5bd'
-                        for sku in skus]
-                for url, sku in zip(urls, skus):
-                    item.update({'manufacturerSKU': sku, 'mainImageName(.png)': sku.lower()})
-                    yield scrapy.Request(url, callback=self.parse, cb_kwargs=item)
-
             url = f'https://ultimate-dot-acp-magento.appspot.com/?q={sku_string}+{brand}&store_id=14034773&UUID=34efc3a6-91d4-4403-99fa-5633d6e9a5bd'
-            yield scrapy.Request(url, callback=self.parse, cb_kwargs=item)
+            yield scrapy.Request(url, callback=self.parse, cb_kwargs=item,
+                                #  dont_filter=True
+                                 )
+
+            # if len(skus) > 1:
+            #     console.log(f'This line has manufacturerSKU "{sku_string}".')
+
+            #     # console.log(f'Searching for "{sku_string}" now...')
+            #     # guessed_url = f"https://www.northcountryfire.com/products/{item['ID']}"
+            #     # yield scrapy.Request(url=guessed_url,
+            #     #         # callback=self.parse_guessed_url,
+            #     #         callback=self.parse,
+            #     #         # errback=self.errback_guessed_url,
+            #     #         cb_kwargs=item)
+
+            #     separated_search_terms_string = ', '.join(f'"{term}"' for term in skus)
+            #     console.log(f'Searching separately for {separated_search_terms_string} now...')
+            #     urls = [f'https://ultimate-dot-acp-magento.appspot.com/?q={sku}+{brand}&store_id=14034773&UUID=34efc3a6-91d4-4403-99fa-5633d6e9a5bd'
+            #             for sku in skus]
+            #     for url, sku in zip(urls, skus):
+            #         item.update({'manufacturerSKU': sku, 'mainImageName(.png)': sku.lower()})
+            #         yield scrapy.Request(url, callback=self.parse,
+            #                              cb_kwargs=item,
+            #                             #  dont_filter=True
+            #                              )
+
 
     def parse(self, response, **item):
-        # breakpoint()
         json_res = json.loads(response.body)
 
         # Check for special manufacturerSKU containing spaces
@@ -157,10 +172,13 @@ class NCFImageSpider(scrapy.Spider):
 
         # If the API returns no match at all,
         if (json_res['total_results'] == 0 or not exact_match):
-            # console.log(f'Item with manufacturerSKU "{item["manufacturerSKU"]}" not found')
-            item['comment'] = 'manufacturerSKU not found'
-            write_not_found_item_to_csv(file=IMAGE_NOT_FOUND_RESULT_FILE,
-                                        line=item)
+            guessed_url = f"https://www.northcountryfire.com/products/{item['ID']}"
+            yield scrapy.Request(url=guessed_url,
+                                 callback=self.parse_guessed_url,
+                                 errback=self.errback_guessed_url,
+                                 cb_kwargs=item,
+                                #  dont_filter=True
+                                 )
             return None
 
         desired_image_url = exact_match['t2'].replace('_small.', '_1000x1000.')
@@ -168,84 +186,43 @@ class NCFImageSpider(scrapy.Spider):
         # Some sku contain forward slash, not good for filename, e.g 'VDY24/18NMP', 'RAK35/40'
         # or space, e.g. "BZLB-BLNI RAP54", "BZLB-BLNI RAP42", 'MHS HEAT-ZONE-TOP'
         desired_image_name = item['mainImageName(.png)'].replace('/', '_').replace(' ', '-')
-
+        brand = item['brand']
         item = {
             # 'image_name': json_res['term'],
             # 'image_name': exact_match['sku'].lower(),
             'image_name': desired_image_name,
-            'image_brand': exact_match['v'],
+            'image_brand': brand,
             'file_urls': [desired_image_url],
             # 'files': [json_res["term"]],
         }
-
         yield ImageItem(item)
 
-        # yield scrapy.Request(url=item_url, cb_kwargs=cb_kwargs, callback=self.parse_item)
 
-    # def parse_item(self, response, **cb_kwargs):
-    #     breakpoint()
-    #     date = parse_qs(urlparse(response.url).query)['eventSearchDate'][0]
-    #     date += 'T00:00:00-0500'
-    #     # breakpoint()
-    #     track = '[ORGN] Division of Organic Chemistry'
-    #     # Get all the sessions listing
-    #     # sessions = response.css('.panel.panel-default.panel-session')
-    #     sessions = response.xpath('//div[@id="event-content"]/div[contains(@class, "panel") and contains(@class, "panel-default") and contains(@class, "panel-session")]')
+    def parse_guessed_url(self, response, **item):
+        data = re.findall("var product =(.+?);\n", response.text, re.S)
+        if data:
+            image_url = json.loads(data[0])['featured_image']
+            desired_image_url = re.sub(r'(.*)(\.\w+\?.*)', 'https:\\1_1000x1000\\2', image_url)
 
-    #     for session in sessions:
-    #         session_id = session.css('.panel-heading').xpath('@id').get()
-    #         id_num = re.search(r'\D*(\d+)', session_id)
-    #         zoom_link = f'https://acs.digitellinc.com/acs/events/{id_num[1]}/attend'
-    #         info = session.css('.panel-heading .panel-title .session-panel-title')
-    #         title = info.css('a::text').get().strip()
-    #         time = info.css('.session-panel-heading')[0].css('::text').get().strip()
-    #         time = re.sub(r"\s{2,}", '', time)
-    #         presiders_info = info.css('.session-panel-heading')[1].css('::text').getall()
-    #         presiders = [t for t in (s.strip() for s in presiders_info) if t and t != '|']
-    #         # print(f'{title=}')
-    #         # breakpoint()
+            # Some sku contain forward slash, not good for filename, e.g 'VDY24/18NMP', 'RAK35/40'
+            # or space, e.g. "BZLB-BLNI RAP54", "BZLB-BLNI RAP42", 'MHS HEAT-ZONE-TOP'
+            desired_image_name = item['mainImageName(.png)'].replace('/', '_').replace(' ', '-')
 
-    #         presentations = []
-    #         session_content = session.css('.panel-body .panel.panel-default.panel-session')
-    #         for presentation in session_content:
-    #             presentation_id = presentation.css('.panel-heading').xpath('@id').get()
-    #             presentation_id_num = re.search(r'\D*(\d+)', presentation_id)
-    #             presentation_zoom_link = f'https://acs.digitellinc.com/acs/events/{presentation_id_num[1]}/attend'
+            brand = item['brand']
+            item = {
+                'image_name': desired_image_name,
+                'image_brand': brand,
+                'file_urls': [desired_image_url],
+                # 'files': [json_res["term"]],
+            }
+            yield ImageItem(item)
 
-    #             presentation_info = presentation.css('.panel-heading .panel-title .session-panel-title')
-    #             presentation_title = presentation_info.css('a::text').get().strip()
-    #             presentation_time = presentation_info.css('.session-panel-heading')[0].css('::text').get().strip()
-    #             presentation_time = re.sub(r"\s{2,}", '', presentation_time)
-    #             presenters_info = presentation_info.css('.session-panel-heading')[1].css('::text').getall()
-    #             presenters = [t for t in (s.strip() for s in presenters_info) if t and t != '|']
-    #             presentation_kwargs = {
-    #                 'title': presentation_title,
-    #                 'time': presentation_time,
-    #                 'presenters': presenters,
-    #                 'zoom_link': presentation_zoom_link,
-    #             }
-    #             presentations.append(PresentationItem(presentation_kwargs))
-    #             # breakpoint()
-
-    #         cb_kwargs = {
-    #             'date': date,
-    #             'title': title,
-    #             'time': time,
-    #             'presiders': presiders,
-    #             'presentations': presentations,
-    #             'track': track,
-    #             'zoom_link': zoom_link,
-    #         }
-    #         yield SessionItem(cb_kwargs)
-
-    #     # Find next page url if exists:
-    #     next_page_url = response.css('.pagination.pagination-sm.pull-right')[0].css('li:nth-last-of-type(2) a').xpath('@href').get()
-    #     # # print(f'{next_page_partial_url=}')
-    #     if next_page_url:
-    #         # next_page_url = response.urljoin(next_page_partial_url)
-    #         # print(f'{next_page_url=}')
-    #         # breakpoint()
-    #         yield scrapy.Request(url=next_page_url, callback=self.parse)
+    def errback_guessed_url(self, failure):
+        # Ref: https://docs.scrapy.org/en/latest/topics/request-response.html#accessing-additional-data-in-errback-functions
+        item = failure.request.cb_kwargs
+        item['comment'] = "manufacturerSKU not found through either quick-search API or direct link with 'ID' field"
+        write_not_found_item_to_csv(file=IMAGE_NOT_FOUND_RESULT_FILE,
+                                    line=item)
 
 
 def transform_images():
@@ -317,7 +294,7 @@ if __name__ == '__main__':
 
     settings = {
         'USER_AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36',
-        # 'HTTPCACHE_ENABLED': True,
+        # 'HTTPCACHE_ENABLED': False,
         # 'DEFAULT_REQUEST_HEADERS': {
         #   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         #   'Accept-Language': 'en'
@@ -328,7 +305,7 @@ if __name__ == '__main__':
             # },
         'MEDIA_ALLOW_REDIRECTS': True,
         'FILES_STORE': str(DOWNLOAD_FOLDER),
-        # 'MYPIPELINE_FILES_EXPIRES': 0,
+        # 'MYFILESPIPELINE_FILES_EXPIRES': 0,
         'ITEM_PIPELINES': {
             # 'scrapy.pipelines.images.FilesPipeline': 1,
             '__main__.MyFilesPipeline': 1,
@@ -347,14 +324,18 @@ if __name__ == '__main__':
         #         },
         #     },
         # },
-        'LOG_LEVEL': 'INFO',
-        # 'ROBOTSTXT_OBEY': False,
+        'LOG_LEVEL': 'DEBUG',
+        'LOG_FILE': 'scrape_log.log',
+        'ROBOTSTXT_OBEY': False,
     }
 
     process = CrawlerProcess(settings=settings)
     process.crawl(NCFImageSpider)
-    with console.status("[bold green]Scraping images...") as status:
-        process.start()
+    process.start()
+    # with console.status("[bold green]Scraping images...") as status:
+    #     process.start()
 
     # Disable for now!!
     # transform_images()
+    image_files = {f.resolve() for f in Path(DOWNLOAD_FOLDER).glob('**/*.*')}
+    logging.info(f'{len(image_files)=}')
