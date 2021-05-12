@@ -1,30 +1,26 @@
-import sys
-import re
-from pathlib import Path, PurePath
-from urllib.parse import urlparse, parse_qs
-import logging
-
-import scrapy
 import csv
 import json
+import logging
+import re
+import sys
 from functools import partial
 from multiprocessing import Pool
+from pathlib import Path, PurePath
+from urllib.parse import urlparse
 
-from scrapy.crawler import CrawlerProcess
-from scrapy.exceptions import DropItem
-from scrapy.exporters import CsvItemExporter
+import scrapy
 from itemadapter import ItemAdapter
-from scrapy.exceptions import DropItem
-from items import ImageItem
-
+from PIL import Image
 from rich.console import Console
 from rich.logging import RichHandler
-from rich.progress import Progress, BarColumn, SpinnerColumn, TimeElapsedColumn
+from rich.progress import BarColumn, Progress, SpinnerColumn, TimeElapsedColumn
+from scrapy.crawler import CrawlerProcess
+from scrapy.exceptions import DropItem
 
-from PIL import Image
+from items import ImageItem
 
 console = Console()
-# sys.setrecursionlimit(20000)
+sys.setrecursionlimit(20000)
 
 # # Set logger using Rich: https://rich.readthedocs.io/en/latest/logging.html
 # logging.basicConfig(
@@ -48,7 +44,6 @@ DOWNLOAD_FOLDER.mkdir(exist_ok=True)
 
 from scrapy.pipelines.files import FilesPipeline
 
-
 # TODO: fix for item with SKU is '???'
 
 # TODO: TEST: find correct url for 'GL10B', 'GL10FR'
@@ -59,12 +54,29 @@ from scrapy.pipelines.files import FilesPipeline
 # TODO: TEST: for those "BZLB-BLNI RAP54", "BZLB-BLNI RAP42", 'MHS HEAT-ZONE-TOP'
 
 class MyFilesPipeline(FilesPipeline):
-
     def file_path(self, request, response=None, info=None, *, item=None):
         # Save to 'brand' folder with the sku (lower case) as filename
-
         extension = Path(urlparse(request.url).path).suffix
-        return f"{item['image_brand']}/{item['image_name']}{extension}"
+        file_path = f"{item['image_brand']}/{item['image_name']}{extension}"
+        # console.log(f'{file_path=}')
+        return file_path
+
+    def get_media_requests(self, item, info):
+        '''This is a web to disable FilesPipeline duplicate filter
+        using url parameter and request header
+        to trick scrapy into thinking it is different item
+        Ref: https://stackoverflow.com/a/27756421/6596203
+
+        Another way: https://stackoverflow.com/a/45234135/6596203
+        However, not good since it would prevent updating Scrapy
+        '''
+        adapter = ItemAdapter(item)
+        for file_url in adapter['file_urls']:
+            request = scrapy.Request(f"{file_url}&image_name={item['image_name']}")
+            request.meta['item'] = item
+            request.headers['fpBuster'] = item['image_name']
+            yield request
+
 
 
 def import_item_list(file):
@@ -105,15 +117,15 @@ class NCFImageSpider(scrapy.Spider):
             sku_string = item['manufacturerSKU']
             brand = item['brand']
 
-            # Sometimes, the 'manufacturerSKU' contains items with commas:
-            # e.g.  "HDLOGS-ODCOUG, GR-ODCOUG", "SDLOGS-ODCOUG, GR-ODCOUG", "DLE, RAK35/40"
-            # In these cases, split the on commas and search for each SKU
-            skus = [sku.strip() for sku in sku_string.split(',')]
             url = f'https://ultimate-dot-acp-magento.appspot.com/?q={sku_string}+{brand}&store_id=14034773&UUID=34efc3a6-91d4-4403-99fa-5633d6e9a5bd'
             yield scrapy.Request(url, callback=self.parse, cb_kwargs=item,
                                 #  dont_filter=True
                                  )
 
+            # # Sometimes, the 'manufacturerSKU' contains items with commas:
+            # # e.g.  "HDLOGS-ODCOUG, GR-ODCOUG", "SDLOGS-ODCOUG, GR-ODCOUG", "DLE, RAK35/40"
+            # # In these cases, split the on commas and search for each SKU
+            # skus = [sku.strip() for sku in sku_string.split(',')]
             # if len(skus) > 1:
             #     console.log(f'This line has manufacturerSKU "{sku_string}".')
 
@@ -135,7 +147,6 @@ class NCFImageSpider(scrapy.Spider):
             #                              cb_kwargs=item,
             #                             #  dont_filter=True
             #                              )
-
 
     def parse(self, response, **item):
         json_res = json.loads(response.body)
@@ -188,12 +199,9 @@ class NCFImageSpider(scrapy.Spider):
         desired_image_name = item['mainImageName(.png)'].replace('/', '_').replace(' ', '-')
         brand = item['brand']
         item = {
-            # 'image_name': json_res['term'],
-            # 'image_name': exact_match['sku'].lower(),
             'image_name': desired_image_name,
             'image_brand': brand,
             'file_urls': [desired_image_url],
-            # 'files': [json_res["term"]],
         }
         yield ImageItem(item)
 
@@ -213,7 +221,6 @@ class NCFImageSpider(scrapy.Spider):
                 'image_name': desired_image_name,
                 'image_brand': brand,
                 'file_urls': [desired_image_url],
-                # 'files': [json_res["term"]],
             }
             yield ImageItem(item)
 
