@@ -53,6 +53,7 @@ from scrapy.pipelines.files import FilesPipeline
 # TODO: TEST: for those with input in different cases (lower vs upper), such as '58dva-wtec', rf571', 'w175-0726'
 # TODO: TEST: for those "HDLOGS-ODCOUG, GR-ODCOUG", "SDLOGS-ODCOUG, GR-ODCOUG"
 # TODO: TEST: for those "BZLB-BLNI RAP54", "BZLB-BLNI RAP42", 'MHS HEAT-ZONE-TOP'
+# TODO: FIX: for those say 'webpage found but no data'
 
 class MyFilesPipeline(FilesPipeline):
     def file_path(self, request, response=None, info=None, *, item=None):
@@ -250,6 +251,10 @@ class NCFImageSpider(scrapy.Spider):
             #                      callback=self.parse_image,
             #                      dont_filter=True,
             #                      cb_kwargs=item)
+        else:
+            item['comment'] = "webpage found but no data"
+            write_not_found_item_to_csv(file=IMAGE_NOT_FOUND_RESULT_FILE,
+                                        line=item)
 
     def errback_guessed_url(self, failure):
         # Ref: https://docs.scrapy.org/en/latest/topics/request-response.html#accessing-additional-data-in-errback-functions
