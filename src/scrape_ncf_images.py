@@ -365,7 +365,7 @@ if __name__ == '__main__':
         #         },
         #     },
         # },
-        'LOG_LEVEL': 'DEBUG',
+        'LOG_LEVEL': 'INFO',
         'LOG_FILE': 'scrape_log.log',
         'ROBOTSTXT_OBEY': False,
     }
