@@ -61,22 +61,28 @@ class MyFilesPipeline(FilesPipeline):
         # console.log(f'{file_path=}')
         return file_path
 
-    def get_media_requests(self, item, info):
-        '''This is a web to disable FilesPipeline duplicate filter
-        using url parameter and request header
-        to trick scrapy into thinking it is different item
-        Ref: https://stackoverflow.com/a/27756421/6596203
+    # def get_media_requests(self, item, info):
+    #     '''This is a web to disable FilesPipeline duplicate filter
+    #     using url parameter and request header
+    #     to trick scrapy into thinking it is different item
+    #     Ref: https://stackoverflow.com/a/27756421/6596203
 
-        Another way: https://stackoverflow.com/a/45234135/6596203
-        However, not good since it would prevent updating Scrapy
-        '''
-        adapter = ItemAdapter(item)
-        for file_url in adapter['file_urls']:
-            request = scrapy.Request(f"{file_url}&image_name={item['image_name']}")
-            request.meta['item'] = item
-            request.headers['fpBuster'] = item['image_name']
-            yield request
+    #     Another way: https://stackoverflow.com/a/45234135/6596203
+    #     However, not good since it would prevent updating Scrapy
+    #     '''
+    #     adapter = ItemAdapter(item)
+    #     for file_url in adapter['file_urls']:
+    #         request = scrapy.Request(f"{file_url}&image_name={item['image_name']}")
+    #         request.meta['item'] = item
+    #         request.headers['fpBuster'] = item['image_name']
+    #         yield request
 
+class ImageWriterPipeline:
+    def process_item(self, item, spider):
+        file = DOWNLOAD_FOLDER / item['image_brand'] / f"{item['image_name']}{item['image_extension']}"
+        with open(file, 'wb') as f:
+            f.write(item['image_body'])
+        return item
 
 
 def import_item_list(file):
@@ -101,7 +107,7 @@ def write_not_found_item_to_csv(file, line):
 class NCFImageSpider(scrapy.Spider):
     item_list = import_item_list(INPUT_FILE)
     name = 'ncf-images-spider'
-    allowed_domains = ['ultimate-dot-acp-magento.appspot.com', 'www.northcountryfire.com']
+    # allowed_domains = ['ultimate-dot-acp-magento.appspot.com', 'www.northcountryfire.com']
 
     # item_sku_list = (item["manufacturerSKU"] for item in item_list)
     # start_urls = [f'https://ultimate-dot-acp-magento.appspot.com/?q={sku}&store_id=14034773&UUID=34efc3a6-91d4-4403-99fa-5633d6e9a5bd'
@@ -193,6 +199,7 @@ class NCFImageSpider(scrapy.Spider):
             return None
 
         desired_image_url = exact_match['t2'].replace('_small.', '_1000x1000.')
+        image_extension = re.findall(r'.*(\.\w+)\?.*', desired_image_url)[0]
 
         # Some sku contain forward slash, not good for filename, e.g 'VDY24/18NMP', 'RAK35/40'
         # or space, e.g. "BZLB-BLNI RAP54", "BZLB-BLNI RAP42", 'MHS HEAT-ZONE-TOP'
@@ -201,16 +208,21 @@ class NCFImageSpider(scrapy.Spider):
         item = {
             'image_name': desired_image_name,
             'image_brand': brand,
+            'image_extension': image_extension,
             'file_urls': [desired_image_url],
         }
-        yield ImageItem(item)
-
+        # yield ImageItem(item)
+        yield scrapy.Request(url=desired_image_url,
+                             callback=self.parse_image,
+                             dont_filter=True,
+                             cb_kwargs=item)
 
     def parse_guessed_url(self, response, **item):
         data = re.findall("var product =(.+?);\n", response.text, re.S)
         if data:
             image_url = json.loads(data[0])['featured_image']
             desired_image_url = re.sub(r'(.*)(\.\w+\?.*)', 'https:\\1_1000x1000\\2', image_url)
+            image_extension = re.findall(r'.*(\.\w+)\?.*', desired_image_url)[0]
 
             # Some sku contain forward slash, not good for filename, e.g 'VDY24/18NMP', 'RAK35/40'
             # or space, e.g. "BZLB-BLNI RAP54", "BZLB-BLNI RAP42", 'MHS HEAT-ZONE-TOP'
@@ -220,9 +232,14 @@ class NCFImageSpider(scrapy.Spider):
             item = {
                 'image_name': desired_image_name,
                 'image_brand': brand,
+                'image_extension': image_extension,
                 'file_urls': [desired_image_url],
             }
-            yield ImageItem(item)
+            # yield ImageItem(item)
+            yield scrapy.Request(url=desired_image_url,
+                                 callback=self.parse_image,
+                                 dont_filter=True,
+                                 cb_kwargs=item)
 
     def errback_guessed_url(self, failure):
         # Ref: https://docs.scrapy.org/en/latest/topics/request-response.html#accessing-additional-data-in-errback-functions
@@ -230,6 +247,10 @@ class NCFImageSpider(scrapy.Spider):
         item['comment'] = "manufacturerSKU not found through either quick-search API or direct link with 'ID' field"
         write_not_found_item_to_csv(file=IMAGE_NOT_FOUND_RESULT_FILE,
                                     line=item)
+
+    def parse_image(self, response, **item):
+        item['image_body'] = response.body
+        yield ImageItem(item)
 
 
 def transform_images():
@@ -307,15 +328,13 @@ if __name__ == '__main__':
         #   'Accept-Language': 'en'
         # },
         # 'CSV_EXPORT_FILE': THIS_SPIDER_RESULT_FILE,
-        # 'ITEM_PIPELINES': {
-            # '__main__.RemoveIgnoredKeywordsPipeline': 100,
-            # },
         'MEDIA_ALLOW_REDIRECTS': True,
         'FILES_STORE': str(DOWNLOAD_FOLDER),
         # 'MYFILESPIPELINE_FILES_EXPIRES': 0,
         'ITEM_PIPELINES': {
             # 'scrapy.pipelines.images.FilesPipeline': 1,
-            '__main__.MyFilesPipeline': 1,
+            # '__main__.MyFilesPipeline': 1,
+            '__main__.ImageWriterPipeline': 2,
         },
         # 'FEEDS': {
         #     Path(THIS_SPIDER_RESULT_FILE): {
