@@ -126,7 +126,7 @@ class NCFImageSpider(scrapy.Spider):
 
             url = f'https://ultimate-dot-acp-magento.appspot.com/?q={sku_string}+{brand}&store_id=14034773&UUID=34efc3a6-91d4-4403-99fa-5633d6e9a5bd'
             yield scrapy.Request(url, callback=self.parse, cb_kwargs=item,
-                                #  dont_filter=True
+                                 dont_filter=True
                                  )
 
             # # Sometimes, the 'manufacturerSKU' contains items with commas:
@@ -195,7 +195,7 @@ class NCFImageSpider(scrapy.Spider):
                                  callback=self.parse_guessed_url,
                                  errback=self.errback_guessed_url,
                                  cb_kwargs=item,
-                                #  dont_filter=True
+                                 dont_filter=True
                                  )
             return None
 
