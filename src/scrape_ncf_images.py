@@ -9,6 +9,7 @@ from pathlib import Path, PurePath
 from urllib.parse import urlparse
 
 import scrapy
+from furl import furl
 from itemadapter import ItemAdapter
 from PIL import Image
 from rich.console import Console
@@ -199,47 +200,56 @@ class NCFImageSpider(scrapy.Spider):
             return None
 
         desired_image_url = exact_match['t2'].replace('_small.', '_1000x1000.')
-        image_extension = re.findall(r'.*(\.\w+)\?.*', desired_image_url)[0]
+        # image_extension = re.findall(r'.*(\.\w+)\?.*', desired_image_url)[0]
 
         # Some sku contain forward slash, not good for filename, e.g 'VDY24/18NMP', 'RAK35/40'
         # or space, e.g. "BZLB-BLNI RAP54", "BZLB-BLNI RAP42", 'MHS HEAT-ZONE-TOP'
         desired_image_name = item['mainImageName(.png)'].replace('/', '_').replace(' ', '-')
+
+        # Add url query as a way to distinguish URL,
+        # therefore can trick FilesPipeline into disable duplicate filter
+        desired_image_url = furl(desired_image_url).add({'image_name': desired_image_name}).url
+
         brand = item['brand']
         item = {
             'image_name': desired_image_name,
             'image_brand': brand,
-            'image_extension': image_extension,
+            # 'image_extension': image_extension,
             'file_urls': [desired_image_url],
         }
-        # yield ImageItem(item)
-        yield scrapy.Request(url=desired_image_url,
-                             callback=self.parse_image,
-                             dont_filter=True,
-                             cb_kwargs=item)
+        yield ImageItem(item)
+        # yield scrapy.Request(url=desired_image_url,
+        #                      callback=self.parse_image,
+        #                      dont_filter=True,
+        #                      cb_kwargs=item)
 
     def parse_guessed_url(self, response, **item):
         data = re.findall("var product =(.+?);\n", response.text, re.S)
         if data:
             image_url = json.loads(data[0])['featured_image']
             desired_image_url = re.sub(r'(.*)(\.\w+\?.*)', 'https:\\1_1000x1000\\2', image_url)
-            image_extension = re.findall(r'.*(\.\w+)\?.*', desired_image_url)[0]
+            # image_extension = re.findall(r'.*(\.\w+)\?.*', desired_image_url)[0]
 
             # Some sku contain forward slash, not good for filename, e.g 'VDY24/18NMP', 'RAK35/40'
             # or space, e.g. "BZLB-BLNI RAP54", "BZLB-BLNI RAP42", 'MHS HEAT-ZONE-TOP'
             desired_image_name = item['mainImageName(.png)'].replace('/', '_').replace(' ', '-')
 
+            # Add url query as a way to distinguish URL,
+            # therefore can trick FilesPipeline into disable duplicate filter
+            desired_image_url = furl(desired_image_url).add({'image_name': desired_image_name}).url
+
             brand = item['brand']
             item = {
                 'image_name': desired_image_name,
                 'image_brand': brand,
-                'image_extension': image_extension,
+                # 'image_extension': image_extension,
                 'file_urls': [desired_image_url],
             }
-            # yield ImageItem(item)
-            yield scrapy.Request(url=desired_image_url,
-                                 callback=self.parse_image,
-                                 dont_filter=True,
-                                 cb_kwargs=item)
+            yield ImageItem(item)
+            # yield scrapy.Request(url=desired_image_url,
+            #                      callback=self.parse_image,
+            #                      dont_filter=True,
+            #                      cb_kwargs=item)
 
     def errback_guessed_url(self, failure):
         # Ref: https://docs.scrapy.org/en/latest/topics/request-response.html#accessing-additional-data-in-errback-functions
@@ -333,8 +343,8 @@ if __name__ == '__main__':
         # 'MYFILESPIPELINE_FILES_EXPIRES': 0,
         'ITEM_PIPELINES': {
             # 'scrapy.pipelines.images.FilesPipeline': 1,
-            # '__main__.MyFilesPipeline': 1,
-            '__main__.ImageWriterPipeline': 2,
+            '__main__.MyFilesPipeline': 1,
+            # '__main__.ImageWriterPipeline': 2,
         },
         # 'FEEDS': {
         #     Path(THIS_SPIDER_RESULT_FILE): {
