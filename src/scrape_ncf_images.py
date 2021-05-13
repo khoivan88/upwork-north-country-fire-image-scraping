@@ -79,6 +79,7 @@ class MyFilesPipeline(FilesPipeline):
     #         request.headers['fpBuster'] = item['image_name']
     #         yield request
 
+
 class ImageWriterPipeline:
     def process_item(self, item, spider):
         file = DOWNLOAD_FOLDER / item['image_brand'] / f"{item['image_name']}{item['image_extension']}"
@@ -252,7 +253,7 @@ class NCFImageSpider(scrapy.Spider):
             #                      dont_filter=True,
             #                      cb_kwargs=item)
         else:
-            item['comment'] = "webpage found but no data"
+            item['comment'] = "No product via direct link with 'ID' field"
             write_not_found_item_to_csv(file=IMAGE_NOT_FOUND_RESULT_FILE,
                                         line=item)
 
@@ -365,7 +366,7 @@ if __name__ == '__main__':
         #         },
         #     },
         # },
-        'LOG_LEVEL': 'INFO',
+        'LOG_LEVEL': 'DEBUG',
         'LOG_FILE': 'scrape_log.log',
         'ROBOTSTXT_OBEY': False,
     }
