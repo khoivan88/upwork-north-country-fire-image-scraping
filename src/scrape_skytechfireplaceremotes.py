@@ -108,6 +108,11 @@ class SkytechfireplaceremotesSpider(scrapy.Spider):
                                     errback=self.errback_guessed_url,
                                     cb_kwargs=item,
                                     dont_filter=True)
+            else:
+                item['comment'] = "manufacturerSKU is not searched on Skytechfireplaceremotes.com"
+                write_not_found_item_to_csv(file=IMAGE_NOT_FOUND_RESULT_FILE,
+                                            line=item)
+
 
     def parse(self, response, **item):
         # Some search redirected to a product immediately

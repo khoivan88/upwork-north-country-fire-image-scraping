@@ -1,18 +1,18 @@
-2021-05-14 17:43:50 [scrapy.utils.log] INFO: Scrapy 2.5.0 started (bot: scrapybot)
-2021-05-14 17:43:50 [scrapy.utils.log] INFO: Versions: lxml 4.6.3.0, libxml2 2.9.10, cssselect 1.1.0, parsel 1.6.0, w3lib 1.22.0, Twisted 21.2.0, Python 3.9.4 (default, Apr 22 2021, 12:02:23) - [Clang 12.0.0 (clang-1200.0.32.29)], pyOpenSSL 20.0.1 (OpenSSL 1.1.1k  25 Mar 2021), cryptography 3.4.7, Platform macOS-10.15.7-x86_64-i386-64bit
-2021-05-14 17:43:50 [scrapy.utils.log] DEBUG: Using reactor: twisted.internet.selectreactor.SelectReactor
-2021-05-14 17:43:50 [scrapy.crawler] INFO: Overridden settings:
+2021-05-14 18:04:47 [scrapy.utils.log] INFO: Scrapy 2.5.0 started (bot: scrapybot)
+2021-05-14 18:04:47 [scrapy.utils.log] INFO: Versions: lxml 4.6.3.0, libxml2 2.9.10, cssselect 1.1.0, parsel 1.6.0, w3lib 1.22.0, Twisted 21.2.0, Python 3.9.4 (default, Apr 22 2021, 12:02:23) - [Clang 12.0.0 (clang-1200.0.32.29)], pyOpenSSL 20.0.1 (OpenSSL 1.1.1k  25 Mar 2021), cryptography 3.4.7, Platform macOS-10.15.7-x86_64-i386-64bit
+2021-05-14 18:04:47 [scrapy.utils.log] DEBUG: Using reactor: twisted.internet.selectreactor.SelectReactor
+2021-05-14 18:04:47 [scrapy.crawler] INFO: Overridden settings:
 {'LOG_FILE': 'scrape_log_skytechfireplaceremotes.log',
  'USER_AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
                'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 '
                'Safari/537.36'}
-2021-05-14 17:43:50 [scrapy.extensions.telnet] INFO: Telnet Password: 5a2800fe5ea6da85
-2021-05-14 17:43:50 [scrapy.middleware] INFO: Enabled extensions:
+2021-05-14 18:04:47 [scrapy.extensions.telnet] INFO: Telnet Password: ecac0fb9add49ae9
+2021-05-14 18:04:47 [scrapy.middleware] INFO: Enabled extensions:
 ['scrapy.extensions.corestats.CoreStats',
  'scrapy.extensions.telnet.TelnetConsole',
  'scrapy.extensions.memusage.MemoryUsage',
  'scrapy.extensions.logstats.LogStats']
-2021-05-14 17:43:50 [scrapy.middleware] INFO: Enabled downloader middlewares:
+2021-05-14 18:04:47 [scrapy.middleware] INFO: Enabled downloader middlewares:
 ['scrapy.downloadermiddlewares.httpauth.HttpAuthMiddleware',
  'scrapy.downloadermiddlewares.downloadtimeout.DownloadTimeoutMiddleware',
  'scrapy.downloadermiddlewares.defaultheaders.DefaultHeadersMiddleware',
@@ -24,30 +24,37 @@
  'scrapy.downloadermiddlewares.cookies.CookiesMiddleware',
  'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware',
  'scrapy.downloadermiddlewares.stats.DownloaderStats']
-2021-05-14 17:43:50 [scrapy.middleware] INFO: Enabled spider middlewares:
+2021-05-14 18:04:47 [scrapy.middleware] INFO: Enabled spider middlewares:
 ['scrapy.spidermiddlewares.httperror.HttpErrorMiddleware',
  'scrapy.spidermiddlewares.offsite.OffsiteMiddleware',
  'scrapy.spidermiddlewares.referer.RefererMiddleware',
  'scrapy.spidermiddlewares.urllength.UrlLengthMiddleware',
  'scrapy.spidermiddlewares.depth.DepthMiddleware']
-2021-05-14 17:43:50 [scrapy.middleware] INFO: Enabled item pipelines:
+2021-05-14 18:04:47 [scrapy.middleware] INFO: Enabled item pipelines:
 ['__main__.MyFilesPipeline']
-2021-05-14 17:43:50 [scrapy.core.engine] INFO: Spider opened
-2021-05-14 17:43:50 [scrapy.extensions.logstats] INFO: Crawled 0 pages (at 0 pages/min), scraped 0 items (at 0 items/min)
-2021-05-14 17:43:50 [scrapy.extensions.telnet] INFO: Telnet console listening on 127.0.0.1:6023
-2021-05-14 17:43:51 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-3301> (referer: None)
-2021-05-14 17:43:52 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-1001T/LCD> (referer: None)
-2021-05-14 17:43:52 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-1001BE> (referer: None)
-2021-05-14 17:43:52 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-3301BE> (referer: None)
-2021-05-14 17:43:52 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-1410-A> (referer: None)
-2021-05-14 17:43:52 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-1001D-A> (referer: None)
-2021-05-14 17:43:52 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-1001TH-A> (referer: None)
-2021-05-14 17:43:52 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-3301P> (referer: None)
-2021-05-14 17:43:52 [scrapy.downloadermiddlewares.redirect] DEBUG: Redirecting (302) to <GET https://www.skytechfireplaceremotes.com/discontinued-skytech-1410th-a-fireplace-remote-control-replaced-by-sky-1420th-a.html> from <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-1410TH-A>
-2021-05-14 17:43:53 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/skytech-3301-timer-thermostat-fireplace-remote-control.html> (referer: https://www.skytechfireplaceremotes.com/search/?q=SKY-3301)
-2021-05-14 17:43:53 [scrapy.pipelines.files] DEBUG: File (uptodate): Downloaded file from <GET https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-3301.jpg?image_name=sky-3301> referred in <None>
-2021-05-14 17:43:53 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/discontinued-skytech-1410th-a-fireplace-remote-control-replaced-by-sky-1420th-a.html> (referer: None)
-2021-05-14 17:43:53 [scrapy.core.scraper] DEBUG: Scraped from <200 https://www.skytechfireplaceremotes.com/skytech-3301-timer-thermostat-fireplace-remote-control.html>
+2021-05-14 18:04:47 [scrapy.core.engine] INFO: Spider opened
+2021-05-14 18:04:47 [scrapy.extensions.logstats] INFO: Crawled 0 pages (at 0 pages/min), scraped 0 items (at 0 items/min)
+2021-05-14 18:04:47 [scrapy.extensions.telnet] INFO: Telnet console listening on 127.0.0.1:6023
+2021-05-14 18:04:48 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-3301BE> (referer: None)
+2021-05-14 18:04:48 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-1001BE> (referer: None)
+2021-05-14 18:04:48 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-1001T/LCD> (referer: None)
+2021-05-14 18:04:49 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-3301> (referer: None)
+2021-05-14 18:04:50 [scrapy.downloadermiddlewares.redirect] DEBUG: Redirecting (302) to <GET https://www.skytechfireplaceremotes.com/skytech-5001-receiver-box-only.html> from <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-5001>
+2021-05-14 18:04:50 [scrapy.downloadermiddlewares.redirect] DEBUG: Redirecting (302) to <GET https://www.skytechfireplaceremotes.com/discontinued-skytech-1410th-a-fireplace-remote-control-replaced-by-sky-1420th-a.html> from <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-1410TH-A>
+2021-05-14 18:04:50 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-3002> (referer: None)
+2021-05-14 18:04:51 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-1001TH-A> (referer: None)
+2021-05-14 18:04:51 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-1410-A> (referer: None)
+2021-05-14 18:04:51 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-1001D-A> (referer: None)
+2021-05-14 18:04:51 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-3301P> (referer: None)
+2021-05-14 18:04:51 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/skytech-3301-timer-thermostat-fireplace-remote-control.html> (referer: https://www.skytechfireplaceremotes.com/search/?q=SKY-3301)
+2021-05-14 18:04:51 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/skytech-5001-receiver-box-only.html> (referer: None)
+2021-05-14 18:04:51 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/discontinued-skytech-1410th-a-fireplace-remote-control-replaced-by-sky-1420th-a.html> (referer: None)
+2021-05-14 18:04:51 [scrapy.pipelines.files] DEBUG: File (uptodate): Downloaded file from <GET https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-3301.jpg?image_name=sky-3301> referred in <None>
+2021-05-14 18:04:51 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-3301PF> (referer: None)
+2021-05-14 18:04:51 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/skytech-3002-timer-thermostat-fireplace-remote-control.html> (referer: https://www.skytechfireplaceremotes.com/search/?q=SKY-3002)
+2021-05-14 18:04:51 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/skytech-1001th-open-box-item.html> (referer: https://www.skytechfireplaceremotes.com/search/?q=SKY-1001TH-A)
+2021-05-14 18:04:51 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-3301PBE> (referer: None)
+2021-05-14 18:04:51 [scrapy.core.scraper] DEBUG: Scraped from <200 https://www.skytechfireplaceremotes.com/skytech-3301-timer-thermostat-fireplace-remote-control.html>
 {'file_urls': ['https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-3301.jpg?image_name=sky-3301'],
  'files': [{'checksum': 'f992186605115854206d201dc2990738',
             'path': 'Skytech/sky-3301.jpg',
@@ -55,59 +62,14 @@
             'url': 'https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-3301.jpg?image_name=sky-3301'}],
  'image_brand': 'Skytech',
  'image_name': 'sky-3301'}
-2021-05-14 17:43:53 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/skytech-1001th-open-box-item.html> (referer: https://www.skytechfireplaceremotes.com/search/?q=SKY-1001TH-A)
-2021-05-14 17:43:53 [scrapy.pipelines.files] DEBUG: File (uptodate): Downloaded file from <GET https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-1001th-a.jpg?image_name=sky-1001th-a> referred in <None>
-2021-05-14 17:43:53 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/skytech-3301p-open-box-item.html> (referer: https://www.skytechfireplaceremotes.com/search/?q=SKY-3301P)
-2021-05-14 17:43:53 [scrapy.core.scraper] DEBUG: Scraped from <200 https://www.skytechfireplaceremotes.com/skytech-1001th-open-box-item.html>
-{'file_urls': ['https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-1001th-a.jpg?image_name=sky-1001th-a'],
- 'files': [{'checksum': '4ba60801f9d9abe0131338a194c9d0ab',
-            'path': 'Skytech/sky-1001th-a.jpg',
-            'status': 'uptodate',
-            'url': 'https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-1001th-a.jpg?image_name=sky-1001th-a'}],
- 'image_brand': 'Skytech',
- 'image_name': 'sky-1001th-a'}
-2021-05-14 17:43:53 [scrapy.pipelines.files] DEBUG: File (uptodate): Downloaded file from <GET https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-3301p.jpg?image_name=sky-3301p> referred in <None>
-2021-05-14 17:43:53 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/discontinued-skytech-1410th-a-fireplace-remote-control-replaced-by-sky-1420th-a.html> (referer: https://www.skytechfireplaceremotes.com/discontinued-skytech-1410th-a-fireplace-remote-control-replaced-by-sky-1420th-a.html)
-2021-05-14 17:43:53 [scrapy.downloadermiddlewares.redirect] DEBUG: Redirecting (302) to <GET https://www.skytechfireplaceremotes.com/skytech-5001-receiver-box-only.html> from <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-5001>
-2021-05-14 17:43:53 [scrapy.core.scraper] DEBUG: Scraped from <200 https://www.skytechfireplaceremotes.com/skytech-3301p-open-box-item.html>
-{'file_urls': ['https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-3301p.jpg?image_name=sky-3301p'],
- 'files': [{'checksum': 'e0891ae91d01a912cbb271bc94ef8435',
-            'path': 'Skytech/sky-3301p.jpg',
-            'status': 'uptodate',
-            'url': 'https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-3301p.jpg?image_name=sky-3301p'}],
- 'image_brand': 'Skytech',
- 'image_name': 'sky-3301p'}
-2021-05-14 17:43:53 [scrapy.pipelines.files] DEBUG: File (uptodate): Downloaded file from <GET https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-1410th-a.jpg?image_name=sky-1410th-a> referred in <None>
-2021-05-14 17:43:53 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-3301PF> (referer: None)
-2021-05-14 17:43:53 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/skytech-5001-receiver-box-only.html> (referer: None)
-2021-05-14 17:43:53 [scrapy.core.scraper] DEBUG: Scraped from <200 https://www.skytechfireplaceremotes.com/discontinued-skytech-1410th-a-fireplace-remote-control-replaced-by-sky-1420th-a.html>
-{'file_urls': ['https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-1410th-a.jpg?image_name=sky-1410th-a'],
- 'files': [{'checksum': 'bd867e6d143f53385fc4de0b850c3baf',
-            'path': 'Skytech/sky-1410th-a.jpg',
-            'status': 'uptodate',
-            'url': 'https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-1410th-a.jpg?image_name=sky-1410th-a'}],
- 'image_brand': 'Skytech',
- 'image_name': 'sky-1410th-a'}
-2021-05-14 17:43:53 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-3301PBE> (referer: None)
-2021-05-14 17:43:54 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-3002> (referer: None)
-2021-05-14 17:43:54 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-5301> (referer: None)
-2021-05-14 17:43:54 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-5310> (referer: None)
-2021-05-14 17:43:54 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/skytech-5001-receiver-box-only.html> (referer: https://www.skytechfireplaceremotes.com/skytech-5001-receiver-box-only.html)
-2021-05-14 17:43:54 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=TS/R-2A> (referer: None)
-2021-05-14 17:43:54 [scrapy.pipelines.files] DEBUG: File (uptodate): Downloaded file from <GET https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/r/e/receiver-box.jpg?image_name=sky-5001> referred in <None>
-2021-05-14 17:43:54 [scrapy.core.scraper] DEBUG: Scraped from <200 https://www.skytechfireplaceremotes.com/skytech-5001-receiver-box-only.html>
-{'file_urls': ['https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/r/e/receiver-box.jpg?image_name=sky-5001'],
- 'files': [{'checksum': '750f97e214b5e54c52403102c26fc5a6',
-            'path': 'Skytech/sky-5001.jpg',
-            'status': 'uptodate',
-            'url': 'https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/r/e/receiver-box.jpg?image_name=sky-5001'}],
- 'image_brand': 'Skytech',
- 'image_name': 'sky-5001'}
-2021-05-14 17:43:54 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/skytech-3002-timer-thermostat-fireplace-remote-control.html> (referer: https://www.skytechfireplaceremotes.com/search/?q=SKY-3002)
-2021-05-14 17:43:54 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/skytech-5301-open-box-item.html> (referer: https://www.skytechfireplaceremotes.com/search/?q=SKY-5301)
-2021-05-14 17:43:54 [scrapy.pipelines.files] DEBUG: File (uptodate): Downloaded file from <GET https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-3002.jpg?image_name=sky-3002> referred in <None>
-2021-05-14 17:43:54 [scrapy.pipelines.files] DEBUG: File (uptodate): Downloaded file from <GET https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-5301.jpg?image_name=sky-5301> referred in <None>
-2021-05-14 17:43:54 [scrapy.core.scraper] DEBUG: Scraped from <200 https://www.skytechfireplaceremotes.com/skytech-3002-timer-thermostat-fireplace-remote-control.html>
+2021-05-14 18:04:51 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/skytech-3301p-open-box-item.html> (referer: https://www.skytechfireplaceremotes.com/search/?q=SKY-3301P)
+2021-05-14 18:04:51 [scrapy.pipelines.files] DEBUG: File (uptodate): Downloaded file from <GET https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-3002.jpg?image_name=sky-3002> referred in <None>
+2021-05-14 18:04:51 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-5301> (referer: None)
+2021-05-14 18:04:51 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/skytech-5001-receiver-box-only.html> (referer: https://www.skytechfireplaceremotes.com/skytech-5001-receiver-box-only.html)
+2021-05-14 18:04:51 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/discontinued-skytech-1410th-a-fireplace-remote-control-replaced-by-sky-1420th-a.html> (referer: https://www.skytechfireplaceremotes.com/discontinued-skytech-1410th-a-fireplace-remote-control-replaced-by-sky-1420th-a.html)
+2021-05-14 18:04:51 [scrapy.pipelines.files] DEBUG: File (uptodate): Downloaded file from <GET https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-1001th-a.jpg?image_name=sky-1001th-a> referred in <None>
+2021-05-14 18:04:51 [scrapy.pipelines.files] DEBUG: File (uptodate): Downloaded file from <GET https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-3301p.jpg?image_name=sky-3301p> referred in <None>
+2021-05-14 18:04:51 [scrapy.core.scraper] DEBUG: Scraped from <200 https://www.skytechfireplaceremotes.com/skytech-3002-timer-thermostat-fireplace-remote-control.html>
 {'file_urls': ['https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-3002.jpg?image_name=sky-3002'],
  'files': [{'checksum': '3612a599696d4613923147478b7c71a0',
             'path': 'Skytech/sky-3002.jpg',
@@ -115,7 +77,44 @@
             'url': 'https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-3002.jpg?image_name=sky-3002'}],
  'image_brand': 'Skytech',
  'image_name': 'sky-3002'}
-2021-05-14 17:43:54 [scrapy.core.scraper] DEBUG: Scraped from <200 https://www.skytechfireplaceremotes.com/skytech-5301-open-box-item.html>
+2021-05-14 18:04:51 [scrapy.pipelines.files] DEBUG: File (uptodate): Downloaded file from <GET https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/r/e/receiver-box.jpg?image_name=sky-5001> referred in <None>
+2021-05-14 18:04:51 [scrapy.pipelines.files] DEBUG: File (uptodate): Downloaded file from <GET https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-1410th-a.jpg?image_name=sky-1410th-a> referred in <None>
+2021-05-14 18:04:51 [scrapy.core.scraper] DEBUG: Scraped from <200 https://www.skytechfireplaceremotes.com/skytech-1001th-open-box-item.html>
+{'file_urls': ['https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-1001th-a.jpg?image_name=sky-1001th-a'],
+ 'files': [{'checksum': '4ba60801f9d9abe0131338a194c9d0ab',
+            'path': 'Skytech/sky-1001th-a.jpg',
+            'status': 'uptodate',
+            'url': 'https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-1001th-a.jpg?image_name=sky-1001th-a'}],
+ 'image_brand': 'Skytech',
+ 'image_name': 'sky-1001th-a'}
+2021-05-14 18:04:51 [scrapy.core.scraper] DEBUG: Scraped from <200 https://www.skytechfireplaceremotes.com/skytech-3301p-open-box-item.html>
+{'file_urls': ['https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-3301p.jpg?image_name=sky-3301p'],
+ 'files': [{'checksum': 'e0891ae91d01a912cbb271bc94ef8435',
+            'path': 'Skytech/sky-3301p.jpg',
+            'status': 'uptodate',
+            'url': 'https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-3301p.jpg?image_name=sky-3301p'}],
+ 'image_brand': 'Skytech',
+ 'image_name': 'sky-3301p'}
+2021-05-14 18:04:51 [scrapy.core.scraper] DEBUG: Scraped from <200 https://www.skytechfireplaceremotes.com/skytech-5001-receiver-box-only.html>
+{'file_urls': ['https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/r/e/receiver-box.jpg?image_name=sky-5001'],
+ 'files': [{'checksum': '750f97e214b5e54c52403102c26fc5a6',
+            'path': 'Skytech/sky-5001.jpg',
+            'status': 'uptodate',
+            'url': 'https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/r/e/receiver-box.jpg?image_name=sky-5001'}],
+ 'image_brand': 'Skytech',
+ 'image_name': 'sky-5001'}
+2021-05-14 18:04:51 [scrapy.core.scraper] DEBUG: Scraped from <200 https://www.skytechfireplaceremotes.com/discontinued-skytech-1410th-a-fireplace-remote-control-replaced-by-sky-1420th-a.html>
+{'file_urls': ['https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-1410th-a.jpg?image_name=sky-1410th-a'],
+ 'files': [{'checksum': 'bd867e6d143f53385fc4de0b850c3baf',
+            'path': 'Skytech/sky-1410th-a.jpg',
+            'status': 'uptodate',
+            'url': 'https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-1410th-a.jpg?image_name=sky-1410th-a'}],
+ 'image_brand': 'Skytech',
+ 'image_name': 'sky-1410th-a'}
+2021-05-14 18:04:51 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/skytech-5301-open-box-item.html> (referer: https://www.skytechfireplaceremotes.com/search/?q=SKY-5301)
+2021-05-14 18:04:51 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=SKY-5310> (referer: None)
+2021-05-14 18:04:52 [scrapy.pipelines.files] DEBUG: File (uptodate): Downloaded file from <GET https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-5301.jpg?image_name=sky-5301> referred in <None>
+2021-05-14 18:04:52 [scrapy.core.scraper] DEBUG: Scraped from <200 https://www.skytechfireplaceremotes.com/skytech-5301-open-box-item.html>
 {'file_urls': ['https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-5301.jpg?image_name=sky-5301'],
  'files': [{'checksum': '181d4adef2905d9966cf3683188cfc2f',
             'path': 'Skytech/sky-5301.jpg',
@@ -123,32 +122,33 @@
             'url': 'https://d3lqrypvficofj.cloudfront.net/media/catalog/product/cache/56479904931fb76a498cfc2b7870f50d/s/k/sky-5301.jpg?image_name=sky-5301'}],
  'image_brand': 'Skytech',
  'image_name': 'sky-5301'}
-2021-05-14 17:43:54 [scrapy.core.engine] INFO: Closing spider (finished)
-2021-05-14 17:43:54 [scrapy.statscollectors] INFO: Dumping Scrapy stats:
-{'downloader/request_bytes': 9631,
+2021-05-14 18:04:52 [scrapy.core.engine] DEBUG: Crawled (200) <GET https://www.skytechfireplaceremotes.com/search/?q=TS/R-2A> (referer: None)
+2021-05-14 18:04:52 [scrapy.core.engine] INFO: Closing spider (finished)
+2021-05-14 18:04:52 [scrapy.statscollectors] INFO: Dumping Scrapy stats:
+{'downloader/request_bytes': 9677,
  'downloader/request_count': 25,
  'downloader/request_method_count/GET': 25,
- 'downloader/response_bytes': 781986,
+ 'downloader/response_bytes': 782001,
  'downloader/response_count': 25,
  'downloader/response_status_count/200': 23,
  'downloader/response_status_count/302': 2,
- 'elapsed_time_seconds': 3.779714,
+ 'elapsed_time_seconds': 5.282635,
  'file_count': 7,
  'file_status_count/uptodate': 7,
  'finish_reason': 'finished',
- 'finish_time': datetime.datetime(2021, 5, 14, 21, 43, 54, 775555),
- 'httpcompression/response_bytes': 3243175,
+ 'finish_time': datetime.datetime(2021, 5, 14, 22, 4, 52, 518639),
+ 'httpcompression/response_bytes': 3243174,
  'httpcompression/response_count': 23,
  'item_scraped_count': 7,
  'log_count/DEBUG': 39,
  'log_count/INFO': 10,
- 'memusage/max': 53440512,
- 'memusage/startup': 53436416,
+ 'memusage/max': 53366784,
+ 'memusage/startup': 53362688,
  'request_depth_max': 1,
  'response_received_count': 23,
  'scheduler/dequeued': 25,
  'scheduler/dequeued/memory': 25,
  'scheduler/enqueued': 25,
  'scheduler/enqueued/memory': 25,
- 'start_time': datetime.datetime(2021, 5, 14, 21, 43, 50, 995841)}
-2021-05-14 17:43:54 [scrapy.core.engine] INFO: Spider closed (finished)
+ 'start_time': datetime.datetime(2021, 5, 14, 22, 4, 47, 236004)}
+2021-05-14 18:04:52 [scrapy.core.engine] INFO: Spider closed (finished)
