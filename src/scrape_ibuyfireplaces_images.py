@@ -105,6 +105,10 @@ class IBuyFireplacesSpider(scrapy.Spider):
                                      callback=self.parse,
                                      cb_kwargs=item,
                                      dont_filter=True)
+            else:
+                item['comment'] = "manufacturerSKU is not searched on iBuyFireplaces.com"
+                write_not_found_item_to_csv(file=IMAGE_NOT_FOUND_RESULT_FILE,
+                                            line=item)
 
     def parse(self, response, **item):
         sku_string = item['manufacturerSKU']
