@@ -38,7 +38,7 @@ DATA_FOLDER = CURRENT_FILEPATH / 'data'
 DATA_FOLDER.mkdir(exist_ok=True)
 # INPUT_FILE = DATA_FOLDER / 'imageNames-test.csv'
 INPUT_FILE = DATA_FOLDER / 'imageNames.csv'
-IMAGE_NOT_FOUND_RESULT_FILE = DATA_FOLDER / 'images_not_found.csv'
+IMAGE_NOT_FOUND_RESULT_FILE = DATA_FOLDER / 'images_not_found_ncf.csv'
 DOWNLOAD_FOLDER = CURRENT_FILEPATH.parent / 'downloads'
 DOWNLOAD_FOLDER.mkdir(exist_ok=True)
 
@@ -229,6 +229,10 @@ class NCFImageSpider(scrapy.Spider):
         data = re.findall("var product =(.+?);\n", response.text, re.S)
         if data:
             image_url = json.loads(data[0])['featured_image']
+            if not image_url:
+                item['comment'] = "Product webpage found via direct link with 'ID' field but no image"
+                write_not_found_item_to_csv(file=IMAGE_NOT_FOUND_RESULT_FILE,
+                                            line=item)
             desired_image_url = re.sub(r'(.*)(\.\w+\?.*)', 'https:\\1_1000x1000\\2', image_url)
             # image_extension = re.findall(r'.*(\.\w+)\?.*', desired_image_url)[0]
 
@@ -367,7 +371,7 @@ if __name__ == '__main__':
         #     },
         # },
         'LOG_LEVEL': 'DEBUG',
-        'LOG_FILE': 'scrape_log.log',
+        'LOG_FILE': 'scrape_log_ncf.log',
         'ROBOTSTXT_OBEY': False,
     }
 
