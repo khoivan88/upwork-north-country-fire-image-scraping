@@ -40,6 +40,11 @@ DATA_FOLDER.mkdir(exist_ok=True)
 INPUT_FILE = DATA_FOLDER / 'images_not_found_ncf.csv'
 # INPUT_FILE = DATA_FOLDER / 'imageNames.csv'
 IMAGE_NOT_FOUND_RESULT_FILE = DATA_FOLDER / 'images_not_found_ibuyfireplaces.csv'
+
+LOG_FOLDER = CURRENT_FILEPATH / 'logs'
+LOG_FOLDER.mkdir(exist_ok=True)
+LOG_FILE = LOG_FOLDER / 'scrape_log_ibuyfireplaces.log'
+
 DOWNLOAD_FOLDER = CURRENT_FILEPATH.parent / 'downloads'
 DOWNLOAD_FOLDER.mkdir(exist_ok=True)
 
@@ -173,6 +178,7 @@ class IBuyFireplacesSpider(scrapy.Spider):
 if __name__ == '__main__':
     # Remove the result file if exists
     IMAGE_NOT_FOUND_RESULT_FILE.unlink(missing_ok=True)
+    LOG_FILE.unlink(missing_ok=True)
 
     settings = {
         'USER_AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36',
@@ -203,7 +209,7 @@ if __name__ == '__main__':
         #     },
         # },
         'LOG_LEVEL': 'DEBUG',
-        'LOG_FILE': 'scrape_log_ibuyfireplaces.log',
+        'LOG_FILE': LOG_FILE,
         'ROBOTSTXT_OBEY': False,
         'AUTOTHROTTLE_ENABLED': True,    # enable this so iBuyFireplaces.com does not block IP
         'RETRY_HTTP_CODES': [
