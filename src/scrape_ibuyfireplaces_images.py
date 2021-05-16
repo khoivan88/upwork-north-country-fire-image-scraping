@@ -45,7 +45,7 @@ LOG_FOLDER = CURRENT_FILEPATH / 'logs'
 LOG_FOLDER.mkdir(exist_ok=True)
 LOG_FILE = LOG_FOLDER / 'scrape_log_ibuyfireplaces.log'
 
-DOWNLOAD_FOLDER = CURRENT_FILEPATH.parent / 'downloads'
+DOWNLOAD_FOLDER = CURRENT_FILEPATH.parent / 'images' / 'downloads'
 DOWNLOAD_FOLDER.mkdir(exist_ok=True)
 
 
