@@ -279,69 +279,6 @@ class NCFImageSpider(scrapy.Spider):
         yield ImageItem(item)
 
 
-def transform_images():
-    image_files = {f.resolve() for f in Path(DOWNLOAD_FOLDER).glob('**/*.*')}
-    # image_files = {f.resolve()
-    #             #    for f in Path(DOWNLOAD_FOLDER).glob('**/cdfi500-pro.png')    # !Only for testing purpose
-    #                for f in Path(DOWNLOAD_FOLDER).glob('**/*')
-    #                if (f.suffix in ['.png', '.jpg', '.jpeg'])}
-    # log.info(f'{image_files=}')
-    # Ref: https://github.com/willmcgugan/rich/issues/121
-    progress = Progress(SpinnerColumn(),
-                        "[bold green]{task.description}",
-                        BarColumn(),
-                        "[progress.percentage]{task.percentage:>3.1f}%",
-                        "•",
-                        TimeElapsedColumn(),
-                        # transient=True,
-                        console=console)
-    with progress:
-        task_id = progress.add_task("Transforming images...", total=len(image_files), start=True)
-
-        try:
-            pool_size = 25
-            with Pool(processes=pool_size) as p:
-                results = p.imap(partial(convert_and_resize,
-                                        #  indir=Path(indir).resolve(),
-                                         ),
-                                 image_files,
-                                 chunksize=8)
-                for result in results:
-                    progress.advance(task_id)
-
-        except Exception as error:
-            # if debug:
-            # traceback_str = ''.join(traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__))
-            # log.error(traceback_str)
-            # log.exception(error)
-            console.log(error)
-
-
-def convert_and_resize(file: PurePath) -> None:
-    file = Path(file)
-    try:
-        save_new_image = False
-        with Image.open(file) as im:
-            if im.size != (1000, 1000):
-                im = im.resize((1000, 1000))
-                # im = im.thumbnail((1000, 1000))     # use `Image.thumbnail` instead of `resize` to keep the same aspect ration
-                save_new_image = True
-            if save_new_image or im.format != 'png':
-                im.save(file.with_suffix('.png'),
-                        optimize=True    # To give the smallest size possible
-                        )
-        # logging.info(f'{file.suffix=}')
-
-        # Remove non-png files
-        if save_new_image and file.suffix != '.png':
-            file.unlink(missing_ok=True)
-    except OSError:
-        logging.exception("cannot convert", file)
-    except Exception as error:
-        print(file)
-        logging.exception(error)
-
-
 if __name__ == '__main__':
     # Remove the result file if exists
     IMAGE_NOT_FOUND_RESULT_FILE.unlink(missing_ok=True)
@@ -387,8 +324,3 @@ if __name__ == '__main__':
     process.start()
     # with console.status("[bold green]Scraping images...") as status:
     #     process.start()
-
-    # Disable for now!!
-    # transform_images()
-    image_files = {f.resolve() for f in Path(DOWNLOAD_FOLDER).glob('**/*.*')}
-    logging.info(f'{len(image_files)=}')
