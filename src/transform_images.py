@@ -134,6 +134,10 @@ def enlarge_to_square(im: Image,
     old_size = im.size  # old_size[0] is in (width, height) format
     ratio = float(desired_size[0]) / max(old_size)
 
+    # If the old size is almost square, increase the smallest dimention instead.
+    if max(old_size)/min(old_size) <= 1.1:
+        ratio = float(desired_size[0]) / min(old_size)
+
     # # Restrict expansion to not more than 2 times
     # ratio = min(ratio, 2)
 
