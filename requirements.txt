@@ -1,8 +1,7 @@
-Scrapy==2.5.0
 itemadapter==0.2.0
-furl==2.1.2
-pandas==1.2.4
-pikepdf==2.12.0
-git+git://github.com/uploadcare/pillow-simd.git@v7.0.0.post3#egg=pillow
 pytest==6.2.4
-rich==10.2.0
+Scrapy==2.5.0
+pandas==1.2.4
+furl==2.1.2
+Pillow==8.2.0
+rich==10.2.2
