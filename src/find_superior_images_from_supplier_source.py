@@ -108,7 +108,12 @@ def extract_superior_images(file):
 def find_superior_image(item: Dict[str, str], directory: List[Dict[str, str]]) -> None:
     img_path = ''
     categories_to_search = ['fireplace', 'firebox', 'stove', 'insert']
-    if any(term in item['c__productCategory'].lower() for term in categories_to_search):
+    # Special case to ignore (high chance of mistmatch or found not to be accurate)
+    if item['manufacturerSKU'].lower() in ['wrt4038is', 'wrt4043is', 'drt4045ten']:
+        # Write to log
+        item.update({'comment': 'Not search Superior provided images due to not good images or no correct match.'})
+        write_items_to_csv(file=IMAGE_NOT_FOUND_RESULT_FILE, lines=[item])
+    elif any(term in item['c__productCategory'].lower() for term in categories_to_search):
         img_path = find_match(item, directory)
         if img_path:
             copy_image(item=item,
