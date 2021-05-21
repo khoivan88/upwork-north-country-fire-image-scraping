@@ -11,6 +11,7 @@ IMAGE_NOT_FOUND_NCF = DATA_FOLDER / 'images_not_found_ncf.csv'
 IMAGE_NOT_FOUND_NAPOLEON = DATA_FOLDER / 'images_not_found_napoleon_catalog.csv'
 IMAGE_NOT_FOUND_SKYTECHREMOTE = DATA_FOLDER / 'images_not_found_skytechfireplaceremotes.csv'
 IMAGE_NOT_FOUND_IBUYFIREPLACES = DATA_FOLDER / 'images_not_found_ibuyfireplaces.csv'
+IMAGE_NOT_FOUND_SUPERIOR_ORIGINAL_IMAGES = DATA_FOLDER / 'images_not_found_superior_from_source.csv'
 IMAGE_FOUND_MANUALLY = DATA_FOLDER / 'images_found_manually.csv'
 
 IMAGE_NOT_FOUND_RESULT_FILE = DATA_FOLDER / 'images_not_found.csv'
@@ -26,12 +27,15 @@ def tally_images_not_found():
     not_found_napoleon = pd.read_csv(IMAGE_NOT_FOUND_NAPOLEON)
     not_found_skytechremote = pd.read_csv(IMAGE_NOT_FOUND_SKYTECHREMOTE)
     not_found_ibuyfireplaces = pd.read_csv(IMAGE_NOT_FOUND_IBUYFIREPLACES)
+    not_found_superior_from_source = pd.read_csv(IMAGE_NOT_FOUND_SUPERIOR_ORIGINAL_IMAGES)
     found_manually = pd.read_csv(IMAGE_FOUND_MANUALLY)
 
     dfs = [not_found_ncf,
-        not_found_napoleon,
-        not_found_skytechremote,
-        not_found_ibuyfireplaces,]
+           not_found_napoleon,
+           not_found_skytechremote,
+           not_found_ibuyfireplaces,
+           not_found_superior_from_source,
+           ]
 
     # Combine all items that show up on all of the NOT FOUND lists
     inner_merged = reduce(
