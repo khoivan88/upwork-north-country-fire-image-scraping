@@ -62,6 +62,9 @@ def directory() -> List[Dict[str, str]]:
         ({'manufacturerSKU': 'DRT35PFDEN',
           'name__default': 'Superior 35 Direct-Vent Traditional Peninsula Gas Fireplace | DRT35PF'},
          'Hi-Res Images/Gas Fireplaces/superior-dvfp-drt3500-40-hires-1.tif'),
+        ({'manufacturerSKU': 'DRL6060TEN',
+          'name__default': 'Superior 60 Contemporary Linear Direct-Vent Gas Fireplace | DRL6060TEN'},
+         'Hi-Res Images/Gas Fireplaces/superior-dvfp-drl6000-60-hires-1.tif'),
     ]
 )
 def test_find_match(item: Dict[str, str], directory: List[Dict[str, str]],

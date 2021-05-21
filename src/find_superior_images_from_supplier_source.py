@@ -111,9 +111,9 @@ def find_superior_image(item: Dict[str, str], directory: List[Dict[str, str]]) -
     if any(term in item['c__productCategory'].lower() for term in categories_to_search):
         img_path = find_match(item, directory)
         if img_path:
-            # copy_image(item=item,
-            #            img_path=img_path,
-            #            out_dir=SUPERIOR_IMAGES_FOR_NCF)
+            copy_image(item=item,
+                       img_path=img_path,
+                       out_dir=SUPERIOR_IMAGES_FOR_NCF)
             # Write the match image file to log
             item.update({'matched_image': Path(img_path).relative_to(SUPERIOR_SOURCE_FOLDER)})
             write_items_to_csv(file=LOG_FILE, lines=[item])
@@ -182,9 +182,13 @@ def find_fuzzy(product_line, directory_choices):
                             for index, line in enumerate(directory_choices)
                             if line['image_type'] == 'Hi-Res Images'}
 
+    # Remove any '...ST' (see-through) product if it is not indicated in the 'product_line'
+    # breakpoint()
+    if not product_line.lower().endswith('st'):
+        image_choices_hi_res = {key: value for key, value in image_choices_hi_res.items() if not value.lower().endswith('st')}
+
     # Return as a tuple of 3 (because the choices was added as dict):
     # (the match value of the dict (which was compared to the string), the score, and the key of the value)
-    # breakpoint()
     options = process.extract(product_line, image_choices_hi_res, limit=5, scorer=fuzz.token_sort_ratio)
     # breakpoint()
     top_score = options[0][1] if options else 0
@@ -225,7 +229,8 @@ def copy_image(item: Dict, img_path: Union[str, PurePath], out_dir: Union[str, P
     # or space, e.g. "BZLB-BLNI RAP54", "BZLB-BLNI RAP42", 'MHS HEAT-ZONE-TOP'
     desired_image_name = item['mainImageName(.png)'].replace('/', '_').replace(' ', '-')
     img_file = Path(img_path)
-    destination = Path(out_dir) / item['brand'] / f'{desired_image_name}{img_file.suffix}'
+    # destination = Path(out_dir) / item['brand'] / f'{desired_image_name}{img_file.suffix}'
+    destination = Path(out_dir) / f'{desired_image_name}{img_file.suffix}'
     try:
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(Path(img_path), Path(destination))
