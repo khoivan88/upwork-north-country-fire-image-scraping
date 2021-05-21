@@ -34,6 +34,7 @@ IMAGE_FOLDER = CURRENT_FILEPATH.parent / 'images'
 INPUT_AUTO_DOWNLOAD_FOLDER = IMAGE_FOLDER / 'downloads'
 INPUT_MANUAL_DOWNLOAD_FOLDER = IMAGE_FOLDER / 'manual_downloads'
 INPUT_MANUALLY_CREATED_FOLDER = IMAGE_FOLDER / 'manually_created'
+INPUT_SUPERIOR_FOLDER = IMAGE_FOLDER / 'superior_images_for_ncf'
 
 OUTPUT_FOLDER = IMAGE_FOLDER / 'final'
 OUTPUT_FOLDER.mkdir(exist_ok=True)
@@ -41,17 +42,20 @@ OUTPUT_FOLDER.mkdir(exist_ok=True)
 DESIRED_IMAGE_SIZE = (1000, 1000)
 
 
-def transform_images(input_folder, output_folder, use_cropped_image=True):
+def transform_images(input_folder,
+                     output_folder,
+                     use_cropped_image=False,
+                     crop_to_square=False):
     # breakpoint()
     image_files = {f.resolve() for f in Path(input_folder).glob('**/*.*')
                    if f.name != '.DS_Store'    # to ignore hidden file in MacOS
                    }
 
-    # Manually cropped images are saved in the same name but in .png
-    if use_cropped_image:
-        image_files = {f.resolve() for f in Path(input_folder).glob('**/*.png')
-                       if f.name != '.DS_Store'    # to ignore hidden file in MacOS
-                       }
+    # # Manually cropped images are saved in the same name but in .png
+    # if use_cropped_image:
+    #     image_files = {f.resolve() for f in Path(input_folder).glob('**/manually_cropped_fireplace_focus/*.png')
+    #                    if f.name != '.DS_Store'    # to ignore hidden file in MacOS
+    #                    }
 
     # image_files = {f.resolve() for f in Path(INPUT_FOLDER).glob('**/62140.jpg')}
     # image_files = {f.resolve()
@@ -92,6 +96,7 @@ def transform_images(input_folder, output_folder, use_cropped_image=True):
                                          input_folder=input_folder,
                                          output_folder=output_folder,
                                          use_cropped_image=use_cropped_image,
+                                         crop_to_square=crop_to_square
                                          ),
                                  image_files,
                                  chunksize=8)
@@ -109,24 +114,30 @@ def transform_images(input_folder, output_folder, use_cropped_image=True):
 def convert_and_resize(in_file: PurePath,
                        input_folder: PurePath,
                        output_folder: PurePath,
-                       use_cropped_image: bool = False) -> None:
+                       use_cropped_image: bool = False,
+                       crop_to_square: bool = False) -> None:
     in_file = Path(in_file)
     outfile = output_folder / in_file.relative_to(input_folder)
 
     # breakpoint()
     try:
         with Image.open(in_file) as im:
-            # new_image = im
-            # if use_cropped_image and min(im.size) > max(DESIRED_IMAGE_SIZE):
-            #     desired_one_dimension = -0.3 * min(im.size) + 2100
-            #     desired_cropping_size = (desired_one_dimension, desired_one_dimension)
-            #     new_image = crop_center(im=im, desired_size=desired_cropping_size)
-            # else:
+            # new_image = enlarge_to_square(im,
+            #                               desired_size=DESIRED_IMAGE_SIZE,
+            #                               background_color=(255, 255, 255)  # Choose white as background colo
+            #                               )
 
-            new_image = enlarge_to_square(im,
-                                          desired_size=DESIRED_IMAGE_SIZE,
-                                          background_color=(255, 255, 255)  # Choose white as background colo
-                                          )
+            new_image = im
+            if crop_to_square and (min(im.size) > max(DESIRED_IMAGE_SIZE)):
+                # desired_one_dimension = -0.3 * min(im.size) + 2100
+                desired_cropping_size = (min(im.size), min(im.size))
+                new_image = crop_center(im=im, desired_size=desired_cropping_size)
+
+            new_image = enlarge_to_square(new_image,
+                                        desired_size=DESIRED_IMAGE_SIZE,
+                                        background_color=(255, 255, 255)  # Choose white as background colo
+                                        )
+
 
             if not outfile.parent.exists():
                 outfile.parent.mkdir(parents=True, exist_ok=True)
@@ -144,7 +155,24 @@ def convert_and_resize(in_file: PurePath,
         logging.exception(error)
 
 
-def crop_center(im: Image, desired_size: Tuple[int]):
+def crop_center(im: Image, desired_size: Tuple[int]) -> Image:
+    """Crop a Pillow Image with desired size in the center
+
+    Ref: https://stackoverflow.com/a/61948697/6596203
+    Also checkout: https://note.nkmk.me/en/python-pillow-image-crop-trimming/
+
+    Parameters
+    ----------
+    im : Image
+        The Pillow Image that needs cropping
+    desired_size : Tuple[int]
+        desired crop size tuple of (width, height)
+
+    Returns
+    -------
+    Image
+        the cropped Pillow image
+    """
     width, height = im.size   # Get dimensions
     new_width, new_height = desired_size
     left = round((width - new_width)/2)
@@ -185,20 +213,16 @@ def enlarge_to_square(im: Image,
 
 
 if __name__ == '__main__':
-    # input_folders = [
-    #     INPUT_MANUAL_DOWNLOAD_FOLDER,
-    #     INPUT_AUTO_DOWNLOAD_FOLDER,
-    #     INPUT_MANUALLY_CREATED_FOLDER,
-    # ]
-    # output_folder = OUTPUT_FOLDER
-    # for folder in input_folders:
-    #     transform_images(input_folder=folder, output_folder=output_folder)
+    input = [
+        # (INPUT_AUTO_DOWNLOAD_FOLDER, {}),
+        # (INPUT_SUPERIOR_FOLDER, {'crop_to_square': True}),
+        # (INPUT_MANUALLY_CREATED_FOLDER, {}),    # ! Run next to last
+        # (INPUT_MANUAL_DOWNLOAD_FOLDER, {}),     # ! Run last
+    ]
+    output_folder = OUTPUT_FOLDER
+    for folder, kwargs in input:
+        transform_images(input_folder=folder, output_folder=output_folder, **kwargs)
 
-    in_folder = IMAGE_FOLDER / 'superior_images_for_ncf'
-    out_folder = IMAGE_FOLDER / 'final' / 'new_superior_from_vendor'
-    transform_images(input_folder=in_folder,
-                     output_folder=out_folder,
-                     use_cropped_image=True)
-
-    image_files = {f.resolve() for f in Path(OUTPUT_FOLDER).glob('**/*.*')}
+    image_files = {f.resolve() for f in Path(OUTPUT_FOLDER).glob('**/*.*')
+                   if f.name != '.DS_Store'}
     logging.info(f'{len(image_files)=}')
