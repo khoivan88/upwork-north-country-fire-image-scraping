@@ -51,6 +51,10 @@ def import_item_list(file):
         for line in dict_reader:
             if line['brand'] == 'Superior':
                 yield line
+            else:
+                # Write not found item to log
+                line.update({'comment': 'Not search Superior provided images because not Superior products'})
+                write_items_to_csv(file=IMAGE_NOT_FOUND_RESULT_FILE, lines=[line])
 
 
 def extract_superior_images(file):
