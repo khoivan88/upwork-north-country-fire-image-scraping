@@ -38,7 +38,7 @@ SUPERIOR_DIRECTORY_FILE = DATA_FOLDER / 'superior_image_directory.csv'
 
 IMAGE_FOLDER = CURRENT_FILEPATH.parent / 'images'
 SUPERIOR_SOURCE_FOLDER = IMAGE_FOLDER / 'superior_source'
-SUPERIOR_IMAGES_FOR_NCF = IMAGE_FOLDER / 'superior_images_for_ncf'
+SUPERIOR_IMAGES_FOR_NCF = IMAGE_FOLDER / 'superior_images_for_ncf' / 'Superior'
 
 LOG_FOLDER = CURRENT_FILEPATH / 'logs'
 LOG_FOLDER.mkdir(exist_ok=True)
