@@ -214,10 +214,10 @@ def enlarge_to_square(im: Image,
 
 if __name__ == '__main__':
     input = [
-        # (INPUT_AUTO_DOWNLOAD_FOLDER, {}),
-        # (INPUT_SUPERIOR_FOLDER, {'crop_to_square': True}),
-        # (INPUT_MANUALLY_CREATED_FOLDER, {}),    # ! Run next to last
-        # (INPUT_MANUAL_DOWNLOAD_FOLDER, {}),     # ! Run last
+        (INPUT_AUTO_DOWNLOAD_FOLDER, {}),
+        (INPUT_SUPERIOR_FOLDER, {'crop_to_square': True}),
+        (INPUT_MANUALLY_CREATED_FOLDER, {}),    # ! Run next to last
+        (INPUT_MANUAL_DOWNLOAD_FOLDER, {}),     # ! Run last
     ]
     output_folder = OUTPUT_FOLDER
     for folder, kwargs in input:
