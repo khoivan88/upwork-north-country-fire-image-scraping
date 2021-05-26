@@ -6,6 +6,7 @@ import sys
 from functools import partial
 from multiprocessing import Pool
 from pathlib import Path, PurePath
+from typing import Dict, Iterable
 from urllib.parse import urlparse
 
 import scrapy
@@ -50,8 +51,6 @@ DOWNLOAD_FOLDER.mkdir(exist_ok=True)
 
 
 from scrapy.pipelines.files import FilesPipeline
-
-# TODO: fix for item with SKU is '???'
 
 # TODO: TEST: find correct url for 'GL10B', 'GL10FR'
 # TODO: TEST: find correct url for 'vdy24/18nmp', 'RAK35/40', 'TM/R2-A', 'CEG-SMOKES/5', 'GC-40/15', 'IFV2-100/15', TH-WTC/LP'
@@ -113,6 +112,30 @@ def write_not_found_item_to_csv(file, line):
         writer.writerow(line)
 
 
+def get_best_match(item: Dict[str,str],
+                   response: Dict[str,str],
+                   has_image: bool = True
+                   ) -> Iterable[Dict[str,str]]:
+    item_sku = item['manufacturerSKU']
+    number_of_word = len(item_sku.split(' '))
+    for match in response['items']:
+        # Check for special manufacturerSKU containing spaces
+        # e.g: "BZLB-BLNI RAP54", "BZLB-BLNI RAP42", 'MHS HEAT-ZONE-TOP'
+        matched_sku = item_sku.lower() == ' '.join(match['skus'][:number_of_word]).lower().rstrip(',')     # Sometimes, item returned by the API has SKU ends with comma (such as 'DLE,')
+        matched_brand = item['brand'].lower() == match['v'].lower()   # match return in API has 'v' containing 'brand'
+        has_image_url = has_image and match['t2']    # match return in API has 't2' containing image url
+        # Sometimes, API contains wrong item with the same SKU, check the description, e.g. item 'W175-0669'
+        _, *sku_in_description = match['l'].split('|')
+        matched_sku_in_description = item_sku.lower() == ' '.join(sku_in_description).strip().lower()
+        if (
+            matched_sku
+            and matched_brand
+            and matched_sku_in_description
+            and (has_image and has_image_url or not has_image)
+        ):
+            yield match
+
+
 class NCFImageSpider(scrapy.Spider):
     item_list = import_item_list(INPUT_FILE)
     name = 'ncf-images-spider'
@@ -166,28 +189,18 @@ class NCFImageSpider(scrapy.Spider):
     def parse(self, response, **item):
         json_res = json.loads(response.body)
 
-        # Check for special manufacturerSKU containing spaces
-        # e.g: "BZLB-BLNI RAP54", "BZLB-BLNI RAP42", 'MHS HEAT-ZONE-TOP'
-        number_of_word = len(item['manufacturerSKU'].split(' '))
-        exact_match = next((match
-                            for match in json_res['items']
-                            if (item['manufacturerSKU'].lower() == ' '.join(match['skus'][:number_of_word]).lower().rstrip(',')     # Sometimes, item returned by the API has SKU ends with comma (such as 'DLE,')
-                                and item['brand'].lower() == match['v'].lower()             # match return in API has 'v' containing 'brand'
-                                and match['t2']                             # match return in API has 't2' containing image url
-                                )
-                            ),
+        # breakpoint()
+        exact_match = next(get_best_match(item=item,
+                                          response=json_res,
+                                          has_image=True),
                            None)
 
         exact_match_without_image = {}
         if not exact_match:
-            number_of_word = len(item['manufacturerSKU'].split(' '))
-            exact_match_without_image = (
-                next((match
-                      for match in json_res['items']
-                      if (item['manufacturerSKU'].lower() == ' '.join(match['skus'][:number_of_word]).lower().rstrip(',')     # Sometimes, item returned by the API has SKU ends with comma (such as 'DLE,')
-                          and item['brand'].lower() == match['v'].lower())),
-                     None)
-            )
+            exact_match_without_image = (next(get_best_match(item=item,
+                                                             response=json_res,
+                                                             has_image=False),
+                                              None))
 
         # Have to check this condition before the other
         if exact_match_without_image:
