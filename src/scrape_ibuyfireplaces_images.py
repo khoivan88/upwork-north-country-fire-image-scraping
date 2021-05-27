@@ -190,7 +190,7 @@ if __name__ == '__main__':
         # 'CSV_EXPORT_FILE': THIS_SPIDER_RESULT_FILE,
         'MEDIA_ALLOW_REDIRECTS': True,
         'FILES_STORE': str(DOWNLOAD_FOLDER),
-        # 'MYFILESPIPELINE_FILES_EXPIRES': 0,
+        'FILES_EXPIRES': 0,
         'ITEM_PIPELINES': {
             '__main__.MyFilesPipeline': 1,
         },
@@ -220,12 +220,6 @@ if __name__ == '__main__':
 
     process = CrawlerProcess(settings=settings)
     process.crawl(IBuyFireplacesSpider)
-    process.start()
-    # with console.status("[bold green]Scraping images...") as status:
-    #     process.start()
-
-    # Disable for now!!
-    # transform_images()
-
-    # image_files = {f.resolve() for f in Path(DOWNLOAD_FOLDER).glob('**/*.*')}
-    # logging.info(f'{len(image_files)=}')
+    # process.start()
+    with console.status("[bold green]Scraping images from iBuyFireplaces.com ...") as status:
+        process.start()
