@@ -11,8 +11,9 @@ from urllib.parse import urlparse
 
 import scrapy
 from furl import furl
+from fuzzywuzzy import fuzz
 from itemadapter import ItemAdapter
-from PIL import Image
+
 from rich.console import Console
 from rich.logging import RichHandler
 from rich.progress import BarColumn, Progress, SpinnerColumn, TimeElapsedColumn
@@ -64,9 +65,8 @@ class MyFilesPipeline(FilesPipeline):
     def file_path(self, request, response=None, info=None, *, item=None):
         # Save to 'brand' folder with the sku (lower case) as filename
         extension = Path(urlparse(request.url).path).suffix
-        file_path = f"{item['image_brand']}/{item['image_name']}{extension}"
         # console.log(f'{file_path=}')
-        return file_path
+        return f"{item['image_brand']}/{item['image_name']}{extension}"
 
     # def get_media_requests(self, item, info):
     #     '''This is a web to disable FilesPipeline duplicate filter
@@ -122,11 +122,10 @@ def get_best_match(item: Dict[str,str],
         # Check for special manufacturerSKU containing spaces
         # e.g: "BZLB-BLNI RAP54", "BZLB-BLNI RAP42", 'MHS HEAT-ZONE-TOP'
         matched_sku = item_sku.lower() == ' '.join(match['skus'][:number_of_word]).lower().rstrip(',')     # Sometimes, item returned by the API has SKU ends with comma (such as 'DLE,')
-        matched_brand = item['brand'].lower() == match['v'].lower()   # match return in API has 'v' containing 'brand'
+        matched_brand = is_matched_brand(item, match)   # match return in API has 'v' containing 'brand'
         has_image_url = has_image and match['t2']    # match return in API has 't2' containing image url
         # Sometimes, API contains wrong item with the same SKU, check the description, e.g. item 'W175-0669'
-        _, *sku_in_description = match['l'].split('|')
-        matched_sku_in_description = item_sku.lower() == ' '.join(sku_in_description).strip().lower()
+        matched_sku_in_description = is_matched_sku_in_description(item, match)
         if (
             matched_sku
             and matched_brand
@@ -134,6 +133,22 @@ def get_best_match(item: Dict[str,str],
             and (has_image and has_image_url or not has_image)
         ):
             yield match
+
+
+def is_matched_brand(item, response_item) -> bool:
+    # SimpliFire is a subbrand of Monessen, in NCF Shopify API, it is in 'Monessen' brand
+    if response_item['v'].lower() == 'Monessen'.lower():
+        return item['brand'].lower() in ['Monessen'.lower(), 'SimpliFire'.lower()]
+    else:
+        return item['brand'].lower() == response_item['v'].lower()
+
+
+def is_matched_sku_in_description(item, response_item) -> bool:
+    item_sku = item['manufacturerSKU']
+    _, *sku_in_description = response_item['l'].split('|')
+    fuzzymatch_score = fuzz.ratio(item_sku.lower(),
+                                  ' '.join(sku_in_description).strip().lower())
+    return fuzzymatch_score > 80
 
 
 class NCFImageSpider(scrapy.Spider):
