@@ -144,7 +144,8 @@ class IBuyFireplacesSpider(scrapy.Spider):
         # image_url = response.css('.product-image a::attr(href)').get()
 
         # This is the original size image url
-        image_url = response.css('.product-image a img::attr(src)').get()
+        # image_url = response.css('.product-image a img::attr(src)').get()
+        image_url = response.css('.product-image a::attr(href)').get()
         if not image_url:
             item['comment'] = "manufacturerSKU found on iBuyFireplaces.com but no image"
             write_not_found_item_to_csv(file=IMAGE_NOT_FOUND_RESULT_FILE,
