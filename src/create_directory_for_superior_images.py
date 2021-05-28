@@ -38,53 +38,53 @@ DESIRED_IMAGE_SIZE = (1000, 1000)
 
 def create_directory_for_superior_images(files, result_file):
     # Synchronouse fashion, easy for debug
-    for file in files:
-        extract_sku(file=file, result_file=result_file)
-        # try:
-        #     extract_sku(file=file, result_file=result_file)
-        # except Exception as error:
-        #     log.error(f'{file=}')
-        #     log.exception(error)
+    # for file in files:
+    #     extract_sku(file=file, result_file=result_file)
+    #     # try:
+    #     #     extract_sku(file=file, result_file=result_file)
+    #     # except Exception as error:
+    #     #     log.error(f'{file=}')
+    #     #     log.exception(error)
 
-    # # Asynchronous fashion, faster
-    # # Ref: https://github.com/willmcgugan/rich/issues/121
-    # progress = Progress(SpinnerColumn(),
-    #                     "[bold green]{task.description}",
-    #                     BarColumn(),
-    #                     "[progress.percentage]{task.percentage:>3.1f}%",
-    #                     "({task.completed} of {task.total})"
-    #                     "•",
-    #                     TimeElapsedColumn(),
-    #                     # transient=True,
-    #                     console=console)
+    # Asynchronous fashion, faster
+    # Ref: https://github.com/willmcgugan/rich/issues/121
+    progress = Progress(SpinnerColumn(),
+                        "[bold green]{task.description}",
+                        BarColumn(),
+                        "[progress.percentage]{task.percentage:>3.1f}%",
+                        "({task.completed} of {task.total})"
+                        "•",
+                        TimeElapsedColumn(),
+                        # transient=True,
+                        console=console)
 
-    # with progress:
-    #     progress.log(f'Extracting model numbers from Installation Manuals')
-    #     task_description = f'Extracting ...'
-    #     task_id = progress.add_task(task_description, total=len(files), start=True)
+    with progress:
+        progress.log(f'Extracting model numbers from Installation Manuals')
+        task_description = f'Extracting ...'
+        task_id = progress.add_task(task_description, total=len(files), start=True)
 
-    #     # for image_file in files:
-    #     #     extract_sku(image_file)
-    #     #     progress.advance(task_id)
+        # for image_file in files:
+        #     extract_sku(image_file)
+        #     progress.advance(task_id)
 
-    #     try:
-    #         pool_size = 25
-    #         with Pool(processes=pool_size) as p:
-    #             results = p.imap(partial(extract_sku,
-    #                                      result_file=result_file,
-    #                                     ),
-    #                              files,
-    #                              chunksize=8)
-    #             for result in results:
-    #                 progress.advance(task_id)
+        try:
+            pool_size = 25
+            with Pool(processes=pool_size) as p:
+                results = p.imap(partial(extract_sku,
+                                         result_file=result_file,
+                                        ),
+                                 files,
+                                 chunksize=8)
+                for result in results:
+                    progress.advance(task_id)
 
-    #     except Exception as error:
-    #         # if debug:
-    #         # traceback_str = ''.join(traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__))
-    #         # log.error(traceback_str)
-    #         # log.exception(error)
-    #         # console.log(f'{file}')
-    #         console.log(error)
+        except Exception as error:
+            # if debug:
+            # traceback_str = ''.join(traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__))
+            # log.error(traceback_str)
+            # log.exception(error)
+            # console.log(f'{file}')
+            console.log(error)
 
 
 def extract_sku(file, result_file):
