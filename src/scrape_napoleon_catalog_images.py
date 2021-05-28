@@ -50,6 +50,12 @@ LOG_FILE = LOG_FOLDER / 'scrape_log_napoleon_catalog.log'
 DOWNLOAD_FOLDER = CURRENT_FILEPATH.parent / 'images' / 'downloads'
 DOWNLOAD_FOLDER.mkdir(exist_ok=True)
 
+# These are known no-image image URLs from Napoleon catalog
+NAPOLEON_CATALOG_NO_IMAGE_IMAGE_URLS = [
+    'https://images.salsify.com/image/upload/s--Npbd8THp--/fl_attachment/ofarsqqslgbiyq3oezhn.png',
+    'https://images.salsify.com/image/upload/s--XrdHKLIL--/fl_attachment/yfzxcujtlgqvvepq9pnz.png',
+]
+
 
 class MyFilesPipeline(FilesPipeline):
     def file_path(self, request, response=None, info=None, *, item=None):
@@ -113,6 +119,12 @@ class NapoleonCatalogSpider(scrapy.Spider):
         image_url = data['profile_asset']['download_url']
         if not image_url:
             item['comment'] = "manufacturerSKU found but no image on Napoleon catalog at https://app.salsify.com/catalogs/44c36744-43f9-447b-9e90-7615b76afbe5/products?filter=%3D&page=1"
+            write_not_found_item_to_csv(file=IMAGE_NOT_FOUND_RESULT_FILE,
+                                        line=item)
+            return None
+
+        if image_url in NAPOLEON_CATALOG_NO_IMAGE_IMAGE_URLS:
+            item['comment'] = "manufacturerSKU found display a generic 'no-image' image on Napoleon catalog at https://app.salsify.com/catalogs/44c36744-43f9-447b-9e90-7615b76afbe5/products?filter=%3D&page=1"
             write_not_found_item_to_csv(file=IMAGE_NOT_FOUND_RESULT_FILE,
                                         line=item)
             return None
