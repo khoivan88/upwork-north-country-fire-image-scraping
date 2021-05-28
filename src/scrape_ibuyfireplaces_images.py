@@ -220,6 +220,36 @@ if __name__ == '__main__':
 
     process = CrawlerProcess(settings=settings)
     process.crawl(IBuyFireplacesSpider)
+
     # process.start()
-    with console.status("[bold green]Scraping images from iBuyFireplaces.com ...") as status:
-        process.start()
+
+    # with console.status("[bold green]Scraping images from iBuyFireplaces.com ...") as status:
+    #     process.start()
+
+    # # Use Python Rich Progress
+    # Ref: https://github.com/willmcgugan/rich/issues/121
+    progress = Progress(SpinnerColumn(),
+                        "[bold green]{task.description}",
+                        # BarColumn(),
+                        # "[progress.percentage]{task.percentage:>3.1f}%",
+                        # "({task.completed} of {task.total})"
+                        "•",
+                        TimeElapsedColumn(),
+                        # transient=True,
+                        # start=False,
+                        console=console)
+
+    with progress:
+        progress.log(f'Scraping images from iBuyFireplaces.com')
+        task_description = f'Scraping images ...'
+        task_id = progress.add_task(task_description, start=False)
+
+        try:
+            progress.start_task(task_id)
+            process.start()
+        except Exception as error:
+            # if debug:
+            # traceback_str = ''.join(traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__))
+            # log.error(traceback_str)
+            # log.exception(error)
+            console.log(error)
