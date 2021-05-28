@@ -1,2 +1,9 @@
-ID,brand,c__productCategory,manufacturerSKU,name__default,mainImageName(.png),imageSize(pixels)
-napoleon-rek-mineral-rock-kit-with-support-bracket-for-inserts,Napoleon,Media Kits,"REK, RAK30","Napoleon REK Mineral Rock Kit with Support Bracket for Inserts | REK, RAK30 |","rek, rak30",1000x1000
+ID,brand,c__productCategory,manufacturerSKU,name__default,mainImageName(.png),imageSize(pixels),duplicated
+monessen-artisan-avflst42-42-indoor-outdoor-vent-free-See-Thru-linear-gas-fireplace,Monessen,Gas Fireplaces,AVFLST42NIP,,avflst42nip,1000x1000,
+simplifire-scion-trinity-55-inch-electric-fireplace-sf-sct43,Monessen,Electric Fireplaces,SF-SCT55-BK,SimpliFire Scion Trinity 55 Inch Electric Fireplace | SF-SCT55 |,sf-sct55-bk,1000x1000,
+empire-rushmore-40-clean-face-See-Thru-direct-vent-gas-fireplace-dvct40csp,Empire,Gas Fireplaces,DVCT40CSP95N,,dvct40csp95n,1000x1000,TRUE
+empire-rushmore-40-clean-face-see-through-direct-vent-gas-fireplace-dvct40csp,Empire,Gas Fireplaces,DVCT40CSP95N,Empire Rushmore 40 Clean Face See-Thru Direct-Vent Gas Fireplace | DVCT40CSP,dvct40csp95n,1000x1000,TRUE
+napoleon-beach-fire-kit-and-chrome-media-tray-dle-rak35-40,Napoleon,Media Kits,"DLE, RAK35/40",Napoleon Beach Fire Kit and Chrome Media Tray | DLE RAK35/40 |,"dle, rak35/40",1000x1000,FALSE
+napoleon-del-beach-fire-kit,Napoleon,Media Kits,"DLE, W655-0610K","Napoleon DLE Beach Fire Kit with Support Bracket | DLE, W655-0610K |","dle, w655-0610k",1000x1000,TRUE
+napoleon-dle-beach-fire-kit,Napoleon,Media Kits,DLE,Napoleon Beach Fire Kit | DLE |,dle,1000x1000,FALSE
+napoleon-gd-110-4x7-direct-vent-fireplace-stove-venting-component-1-12-to-7-12-pitch-roof-terminal-k,Napoleon,Venting Components,GD-110,Napoleon Freedom Flex GD-110 4x7 Wolf Steel Roof Kit | GD110 |,gd-110,1000x1000,FALSE
