@@ -37,7 +37,8 @@ CURRENT_FILEPATH = Path(__file__).resolve().parent
 DATA_FOLDER = CURRENT_FILEPATH / 'data'
 DATA_FOLDER.mkdir(exist_ok=True)
 # INPUT_FILE = DATA_FOLDER / 'imageNames-test.csv'
-INPUT_FILE = DATA_FOLDER / 'images_not_found_ncf.csv'
+# INPUT_FILE = DATA_FOLDER / 'images_not_found_ncf.csv'
+INPUT_FILE = DATA_FOLDER / 'images_not_found_napoleon_catalog.csv'
 # INPUT_FILE = DATA_FOLDER / 'imageNames.csv'
 IMAGE_NOT_FOUND_RESULT_FILE = DATA_FOLDER / 'images_not_found_ibuyfireplaces.csv'
 
